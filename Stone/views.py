@@ -12,8 +12,8 @@ from django.contrib import messages
 from django.db.models import Q, Avg
 from datetime import datetime
 
-from .forms import UserForm
-from .models import Feedback
+from .forms import UserForm, ProductForm
+from .models import Feedback, ByModels
 
 def index(request):
     header = "Данные пользователя"
@@ -46,20 +46,26 @@ def index(request):
 
 def by_product(request):
     if request.method == "POST":
-        name = request.POST.get("name", "Неопределено")
-        numTel = request.POST.get("numTel", 0)
-        adress = request.POST.get("adress", "Самовывоз")
-        langs = request.POST.getlist("language", "Неопределено")
-        
-        context = {
-            'name':name,
-            'numTel':numTel,
-            'adress':adress,
-            'langs':langs,
-        }
-        return render(request, "order_success.html", context)
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            ByModels.objects.create(
+            name=form.cleaned_data['name'],
+            numTel=form.cleaned_data['numTel'],
+            adress=form.cleaned_data['adress'] or "Самовывоз",
+            request_by=form.cleaned_data['langs']
+            )
+            context = {
+                'name':form.cleaned_data['name'],
+                'numTel':form.cleaned_data['numTel'],
+                'adress':form.cleaned_data['adress'] or 'Самовывоз',
+                'langs':form.cleaned_data['langs'],
+            }
+            return render(request, "order_success.html", context)
+        else:
+            return render(request, "by_product.html",{'form':form})
     else:
-        return render(request, "by_product.html")
+        form = ProductForm()
+        return render(request,"by_product.html", {'form':form})
 
 def galerey(request):
     return render(request, "galerey.html")

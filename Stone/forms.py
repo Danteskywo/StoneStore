@@ -38,3 +38,32 @@ class UserForm(forms.Form):
         widget=forms.RadioSelect(attrs={'class':'form-control'})
     )
 
+CHOICE_PHONE = [
+    ("site","Оставить на сайте"),
+    ("call","Позвонить"),
+]
+
+class ProductForm(forms.Form):
+    name = forms.CharField(
+        label="Ваше Имя",
+        max_length=30,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    numTel = forms.CharField(
+        label='Номер телефона',
+        max_length=20,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    adress = forms.CharField(
+        label='Адрес',
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
+    )
+    langs = forms.ChoiceField(
+        choices = CHOICE_PHONE,
+        label="Тип обращения",
+        widget=forms.RadioSelect,
+        initial="call"
+    )
+
+

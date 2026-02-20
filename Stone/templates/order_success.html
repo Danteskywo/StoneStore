@@ -12,24 +12,22 @@
     {% block title %}Заказ принят!{% endblock title %}
     {% block header %}Спасибо за заказ!{% endblock header %}
     {% block content %}
-    <div class="success-message">
-    <h2>Заказ принят!</h2>
+<div class="success-message">
+    <h2>Спасибо, {{ name }}!</h2>
+    <p>Ваш заказ принят</p>
     
     <div class="order-details">
         <p><strong>Имя:</strong> {{ name }}</p>
-        <p><strong>Номер телефона:</strong> {{ numTel }}</p>
-        <p><strong>Адрес доставки:</strong> {{ adress }}</p>
-        <p><strong>Способ доставки:</strong> 
-            {% if langs %}
-                {{ langs|join:", " }}
-            {% else %}
-                Не указано
-            {% endif %}
+        <p><strong>Телефон:</strong> {{ numTel }}</p>
+        <p><strong>Адрес:</strong> {{ adress }}</p>
+        <p><strong>Способ связи:</strong> 
+            {% if langs == 'call' %}Позвонить{% else %}Оставить на сайте{% endif %}
         </p>
     </div>
-    <br>
-    <a href="{% url 'by_product' %}" class="button">Вернуться к форме</a>
-    {% endblock content %}
+    
+    <a href="{% url 'by_product' %}" class="btn">Вернуться к заказу</a>
+</div>
+{% endblock %}
     {% block footer %}
     {% include "banner.html" with corp_name="Dsky" tutorial="Python" corp_data="2026" city="Sochi" site="=)" %}
 {% endblock footer %}

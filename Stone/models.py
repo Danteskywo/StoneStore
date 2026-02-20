@@ -46,8 +46,39 @@ class Feedback(models.Model):
 
     def __str__(self):
         return f"{self.name}-{self.created_at}"
+    
     class Meta:
         verbose_name = "Обратная связь"
         verbose_name_plural = 'обратная связь'
 
 
+CHOICE_PHONE = [
+    ("site","Оставить на сайте"),
+    ("call","Позвонить"),
+]
+
+class ByModels(models.Model):
+    name = models.CharField(
+        max_length=30,
+        verbose_name='Имя'
+        )
+    numTel = models.CharField(
+        max_length=20,
+        verbose_name='номер телефона'
+        )
+    adress = models.TextField(
+        blank=True,
+        verbose_name='Адрес'
+        )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания'
+        )
+    request_by = models.CharField(
+        max_length=10,
+        choices= CHOICE_PHONE,
+        default='call',
+        verbose_name='Заказать звонок'
+    )
+    def __str__(self):
+        return f"{self.name}-{self.created_at}"

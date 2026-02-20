@@ -11,28 +11,38 @@
 <body>{% block title%}Заказать столешницу{% endblock title %}
     {% block header%}Заказать столешницу{% endblock header %}
     {% block content %}
-    <form method="post" action="{% url 'by_product' %}">
+<div class="order-form-container">
+    <h2>Заказать столешницу</h2>
+    
+    <form method="post" class="order-form">
         {% csrf_token %}
-        <p>Ваше имя: </br>
-            <input name="name"/>
-        </p>
-        <p>Ваш номер телефона: </br>
-            <input name="numTel"/>
-        </p>
-        <p>Адрес доставки:</br>
-            <input name="adress"/>
-        </p>
-        <p>
-           Вариант доставки:<br />
-            <select multiple name="language">
-                <option>Доставка до городу</option>
-                <option>Доставка до 100км</option>
-                <option>Самовывоз</option>
-                <option>Отправка транспортной компанией</option> 
-        </p>
-        <input type="submit" value="Отправить">
+        
+        <div class="form-group">
+            <label>{{ form.name.label }}</label>
+            {{ form.name }}
+        </div>
+        
+        <div class="form-group">
+            <label>{{ form.numTel.label }}</label>
+            {{ form.numTel }}
+        </div>
+        
+        <div class="form-group">
+            <label>{{ form.adress.label }}</label>
+            {{ form.adress }}
+        </div>
+        
+        <div class="form-group">
+            <label>{{ form.langs.label }}</label>
+            <div class="radio-group">
+                {{ form.langs }}
+            </div>
+        </div>
+        
+        <button type="submit" class="btn-submit">Отправить заказ</button>
     </form>
-    {% endblock content %}
+</div>
+{% endblock content%}
     
     {% block footer %}{% include "banner.html" with corp_name="Dsky" tutorial="Python" corp_data="2026" city="Sochi" site="=)" %}{% endblock footer %}
 </body>
