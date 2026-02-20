@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+    <title>Галерея</title>
+</head>
+<body>
+    
+    {% block title%}Галерея:{% endblock title %}
+    {% block header%}Галерея:{% endblock header %}
+    {% block content %}
+    {% endblock content %}
+    {% block footer %}{% include "banner.html" with corp_name="Dsky" tutorial="Python" corp_data="2026" city="Sochi" site="=)" %}{% endblock footer %}
+</body>
+</html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} title Base{% endblock title %}</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+</head>
+<body>
+    <div><a href="/index">Главная</a> | <a href="/about">О Нас</a>|<a href="/by_product">Купить</a>|<a href="/gallery">Галерея</a>|<a href="/questions">Оставить отзыв или вопрос</a></div>
+    <h1>{% block header %}{% endblock header %}</h1>
+    <div>{% block content%}{% endblock content %}</div>
+    <div>{% block footer %}{% endblock footer %}<div>
+</body>
+</html>

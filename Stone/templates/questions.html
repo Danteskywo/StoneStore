@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=\, initial-scale=1.0">
+    <title>Отзывы/Вопросы</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+</head>
+<body>
+    {% block title %}Отзывы/Вопросы{% endblock title %}
+    {% block header %}Отзывы/Вопросы{% endblock header %}
+    {% block content %}
+<div class="content">
+    <div class="left-column">
+        <h2>Оставить отзыв</h2>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label>Тип обращения</label>
+                <div class="radio-group">
+                    {{ form.langs }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Ваше имя</label>
+                {{ form.name }}
+            </div>
+
+            <div class="form-group">
+                <label>Телефон</label>
+                {{ form.numTel }}
+            </div>
+
+            <div class="form-group" id="ratingBlock">
+                <label>Оценка</label>
+                <div class="star-rating">
+                    {{ form.rating }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Сообщение</label>
+                {{ form.message }}
+            </div>
+
+            <div class="form-group">
+                <label>Адрес</label>
+                {{ form.adress }}
+            </div>
+
+            <button type="submit" class="btn-submit">Отправить</button>
+        </form>
+    </div>
+
+    <div class="right-column">
+        <h2>Последние отзывы</h2>
+        
+        <div class="filters">
+            <form method="get" class="filter-form">
+                <input type="text" name="search" placeholder="Поиск...">
+                <select name="type">
+                    <option value="all">Все</option>
+                    <option value="review">Отзывы</option>
+                    <option value="question">Вопросы</option>
+                </select>
+                <select name="rating" id="ratingFilter">
+                    <option value="all">Любой рейтинг</option>
+                    <option value="5">5 ★</option>
+                    <option value="4">4 ★</option>
+                    <option value="3">3 ★</option>
+                    <option value="2">2 ★</option>
+                    <option value="1">1 ★</option>
+                </select>
+                <button type="submit">Применить</button>
+                <a href="?" class="reset">Сброс</a>
+            </form>
+            <div class="stats">
+                <span>Всего: {{ total_count }}</span>
+                {% if avg_rating %}
+                    <span>Средний: {{ avg_rating }} ★</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="items-list">
+            {% for item in page_obj %}
+                <div class="item">
+                    <div class="item-header">
+                        <span class="item-name">{{ item.name }}</span>
+                        <span class="item-badge {% if item.langs == 'review' %}review{% else %}question{% endif %}">
+                            {{ item.get_langs_display }}
+                        </span>
+                    </div>
+                    
+                    {% if item.langs == 'review' and item.rating %}
+                        <div class="item-rating">
+                            {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= item.rating %}★{% else %}☆{% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="item-message">
+                        {{ item.message }}
+                    </div>
+                    
+                    {% if item.adress %}
+                        <span class="item-address">{{ item.adress }}</span>
+                    {% endif %}
+                    
+                    <div class="item-date">
+                        {{ item.created_at|date:"d.m.Y H:i" }}
+                    </div>
+                </div>
+            {% empty %}
+                <div class="empty">
+                    Пока нет отзывов
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.has_other_pages %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1">«</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">‹</a>
+                {% endif %}
+                
+                <span>{{ page_obj.number }}</span>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">›</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">»</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ratingBlock = document.getElementById('ratingBlock');
+    const ratingFilter = document.getElementById('ratingFilter');
+    const typeRadios = document.querySelectorAll('input[name="langs"]');
+    
+    function toggleRating() {
+        const selectedType = Array.from(typeRadios).find(r => r.checked)?.value;
+        
+        if (selectedType === 'review') {
+            ratingBlock.style.display = 'block';
+            if (ratingFilter) ratingFilter.disabled = false;
+        } else {
+            ratingBlock.style.display = 'none';
+            if (ratingFilter) ratingFilter.disabled = true;
+        }
+    }
+    
+    typeRadios.forEach(radio => {
+        radio.addEventListener('change', toggleRating);
+    });
+    
+    toggleRating();
+});
+</script>
+{% endblock %}
+
+</body>
+</html>

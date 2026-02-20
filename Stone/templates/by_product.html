@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заказать столешницу</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+</head>
+<body>{% block title%}Заказать столешницу{% endblock title %}
+    {% block header%}Заказать столешницу{% endblock header %}
+    {% block content %}
+    <form method="post" action="{% url 'by_product' %}">
+        {% csrf_token %}
+        <p>Ваше имя: </br>
+            <input name="name"/>
+        </p>
+        <p>Ваш номер телефона: </br>
+            <input name="numTel"/>
+        </p>
+        <p>Адрес доставки:</br>
+            <input name="adress"/>
+        </p>
+        <p>
+           Вариант доставки:<br />
+            <select multiple name="language">
+                <option>Доставка до городу</option>
+                <option>Доставка до 100км</option>
+                <option>Самовывоз</option>
+                <option>Отправка транспортной компанией</option> 
+        </p>
+        <input type="submit" value="Отправить">
+    </form>
+    {% endblock content %}
+    
+    {% block footer %}{% include "banner.html" with corp_name="Dsky" tutorial="Python" corp_data="2026" city="Sochi" site="=)" %}{% endblock footer %}
+</body>
+</html>

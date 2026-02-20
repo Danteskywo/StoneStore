@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document: Contacts</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+</head>
+<body>
+    {% block title%}Контакты{% endblock title %}
+    {% block header%}Контакты{% endblock header %}
+    {% block content %}
+    <p>Email: skywo@mail.ru</p>
+    <p>Номер телефона: +79287207877</p>
+    <p>Адрес: город Нальчик</p>
+    <p>Карта: </p>
+    {% endblock content %}
+    {% block footer %}{% include "banner.html" with corp_name="Dsky" tutorial="Python" corp_data="2026" city="Sochi" site="=)" %}{% endblock footer %}
+</body>
+</body>
+</html>
