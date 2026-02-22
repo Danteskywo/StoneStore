@@ -1,11 +1,62 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h1>gallery</h1>
-</body>
-</html>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Галерея работ - StoneStore{% endblock %}
+
+{% block content %}
+<div class="gallery-page">
+    <div class="gallery-header">
+        <h1>Галерея работ</h1>
+        <p>Наши выполненные проекты из натурального камня</p>
+    </div>
+
+    <div class="gallery-filters">
+        <form method="get" class="gallery-filter-form">
+            <select name="category" class="filter-select" onchange="this.form.submit()">
+                <option value="">Все категории</option>
+                {% for category in categories %}
+                <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"i" %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    <div class="gallery-grid">
+        {% for stone in stones %}
+            {% if stone.main_image %}
+            <div class="gallery-item">
+                <a href="{% url 'stone_detail' stone.slug %}" class="gallery-link">
+                    <div class="gallery-image">
+                        <img src="{{ stone.main_image.url }}" alt="{{ stone.name }}">
+                        <div class="gallery-overlay">
+                            <h3>{{ stone.name }}</h3>
+                            <p>{{ stone.category.name }}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+            
+            {% for image in stone.images.all|slice:":2" %}
+            <div class="gallery-item">
+                <a href="{% url 'stone_detail' stone.slug %}" class="gallery-link">
+                    <div class="gallery-image">
+                        <img src="{{ image.image.url }}" alt="{{ stone.name }}">
+                        <div class="gallery-overlay">
+                            <h3>{{ stone.name }}</h3>
+                            <p>{{ stone.category.name }}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        {% empty %}
+        <div class="gallery-empty">
+            <p>Фотографии не найдены</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
