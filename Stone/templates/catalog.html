@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Каталог камня - StoneStore{% endblock %}
+
+{% block content %}
+<div class="catalog-page">
+    <div class="catalog-header">
+        <h1>Каталог натурального камня</h1>
+        <p>Выберите идеальный камень для вашей столешницы</p>
+    </div>
+
+    <div class="catalog-content">
+        <aside class="filters-sidebar">
+            <h3>Фильтры</h3>
+            <form method="get" class="filter-form">
+                <div class="filter-group">
+                    <label>Категория</label>
+                    <select name="category" class="filter-select">
+                        <option value="">Все категории</option>
+                        {% for category in categories %}
+                        <option value="{{ category.slug }}" {% if current_category == category.slug %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Цена за м²</label>
+                    <div class="price-range">
+                        <input type="number" name="min_price" placeholder="от" value="{{ min_price }}" class="price-input">
+                        <span>-</span>
+                        <input type="number" name="max_price" placeholder="до" value="{{ max_price }}" class="price-input">
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label>Твердость (мин)</label>
+                    <select name="hardness" class="filter-select">
+                        <option value="">Любая</option>
+                        <option value="3" {% if hardness == '3' %}selected{% endif %}>от 3 (Мягкий)</option>
+                        <option value="5" {% if hardness == '5' %}selected{% endif %}>от 5 (Средний)</option>
+                        <option value="7" {% if hardness == '7' %}selected{% endif %}>от 7 (Твердый)</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Поиск</label>
+                    <input type="text" name="search" placeholder="Название камня..." value="{{ search }}" class="filter-input">
+                </div>
+
+                <button type="submit" class="btn-filter">Применить</button>
+                <a href="{% url 'catalog' %}" class="btn-reset">Сбросить</a>
+            </form>
+        </aside>
+
+        <div class="products-grid">
+            <div class="sort-bar">
+                <span>Сортировать:</span>
+                <a href="?sort=-created_at{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}" class="{% if sort == '-created_at' %}active{% endif %}">Новинки</a>
+                <a href="?sort=price_asc{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}" class="{% if sort == 'price_asc' %}active{% endif %}">Цена (возр.)</a>
+                <a href="?sort=price_desc{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}" class="{% if sort == 'price_desc' %}active{% endif %}">Цена (убыв.)</a>
+                <a href="?sort=popular{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}" class="{% if sort == 'popular' %}active{% endif %}">Популярные</a>
+            </div>
+
+            <div class="products">
+                {% for stone in page_obj %}
+                <div class="product-card">
+                    <a href="{% url 'stone_detail' stone.slug %}" class="product-link">
+                        <div class="product-image">
+                            {% if stone.main_image %}
+                            <img src="{{ stone.main_image.url }}" alt="{{ stone.name }}">
+                            {% else %}
+                            <div class="no-image">💎</div>
+                            {% endif %}
+                            {% if stone.is_new %}
+                            <span class="badge-new">Новинка</span>
+                            {% endif %}
+                            {% if stone.is_popular %}
+                            <span class="badge-popular">Популярный</span>
+                            {% endif %}
+                        </div>
+                        <div class="product-info">
+                            <h3>{{ stone.name }}</h3>
+                            <p class="product-category">{{ stone.category.name }}</p>
+                            <div class="product-price">
+                                <span class="price">{{ stone.price_per_sqm }} ₽/м²</span>
+                            </div>
+                            <div class="product-features">
+                                <span>⚒️ Твердость: {{ stone.hardness }}/10</span>
+                                {% if stone.frost_resistance %}
+                                <span>❄️ Морозостойкий</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% empty %}
+                <div class="empty-catalog">
+                    <p>Камни не найдены</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if page_obj.has_other_pages %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                <a href="?page=1{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if hardness %}&hardness={{ hardness }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="page-link">«</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if hardness %}&hardness={{ hardness }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="page-link">‹</a>
+                {% endif %}
+                
+                <span class="page-current">{{ page_obj.number }}</span>
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if hardness %}&hardness={{ hardness }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="page-link">›</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if hardness %}&hardness={{ hardness }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="page-link">»</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

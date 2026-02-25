@@ -1,13 +1,15 @@
-<!DOCTYPE html>
-{% load static %}
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
-</head>
-<body>
-    <div>Corp: @{{corp_name}}: {{tutorial}} @{{corp_data}} City: {{city}} Сайт:{{site}}</div>
-</body>
-</html>
+<div class="banner">
+    <div class="banner-content">
+        <span>Corp: {{ corp_name }}</span>
+        <span>|</span>
+        <span>{{ tutorial }}</span>
+        <span>|</span>
+        <span>{{ corp_data }}</span>
+        <span>|</span>
+        <span>City: {{ city }}</span>
+        {% if site %}
+        <span>|</span>
+        <span>Сайт: {{ site }}</span>
+        {% endif %}
+    </div>
+</div>

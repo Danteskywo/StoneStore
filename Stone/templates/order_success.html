@@ -1,35 +1,65 @@
-<!DOCTYPE html>
 {% extends "base.html" %}
 {% load static %}
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ваш заказ</title>
-    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
-</head>
-<body>
-    {% block title %}Заказ принят!{% endblock title %}
-    {% block header %}Спасибо за заказ!{% endblock header %}
-    {% block content %}
-<div class="success-message">
-    <h2>Спасибо, {{ name }}!</h2>
-    <p>Ваш заказ принят</p>
-    
-    <div class="order-details">
-        <p><strong>Имя:</strong> {{ name }}</p>
-        <p><strong>Телефон:</strong> {{ numTel }}</p>
-        <p><strong>Адрес:</strong> {{ adress }}</p>
-        <p><strong>Способ связи:</strong> 
-            {% if langs == 'call' %}Позвонить{% else %}Оставить на сайте{% endif %}
-        </p>
+
+{% block title %}Заказ принят - StoneStore{% endblock %}
+
+{% block content %}
+<div class="success-page">
+    <div class="success-container">
+        <div class="success-icon">✓</div>
+        <h1>Спасибо за заказ!</h1>
+        <p class="success-message">Ваш заказ №{{ order.id }} успешно принят</p>
+        
+        <div class="order-details">
+            <h2>Детали заказа</h2>
+            <table class="details-table">
+                <tr>
+                    <td>Имя:</td>
+                    <td>{{ order.customer_name }}</td>
+                </tr>
+                <tr>
+                    <td>Телефон:</td>
+                    <td>{{ order.customer_phone }}</td>
+                </tr>
+                {% if order.customer_email %}
+                <tr>
+                    <td>Email:</td>
+                    <td>{{ order.customer_email }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td>Камень:</td>
+                    <td>{{ order.stone.name }}</td>
+                </tr>
+                <tr>
+                    <td>Размеры:</td>
+                    <td>{{ order.length }} x {{ order.width }} м</td>
+                </tr>
+                <tr>
+                    <td>Площадь:</td>
+                    <td>{{ area }} м²</td>
+                </tr>
+                <tr>
+                    <td>Примерная стоимость:</td>
+                    <td class="price">{{ price|floatformat:0 }} ₽</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="next-steps">
+            <h2>Что дальше?</h2>
+            <ol>
+                <li>Наш менеджер свяжется с вами в ближайшее время</li>
+                <li>Мы уточним детали и договоримся о замере</li>
+                <li>После замера подготовим точный расчет</li>
+                <li>Приступим к производству после согласования</li>
+            </ol>
+        </div>
+
+        <div class="success-actions">
+            <a href="{% url 'catalog' %}" class="btn-primary">В каталог</a>
+            <a href="{% url 'home' %}" class="btn-secondary">На главную</a>
+        </div>
     </div>
-    
-    <a href="{% url 'by_product' %}" class="btn">Вернуться к заказу</a>
 </div>
 {% endblock %}
-    {% block footer %}
-    {% include "banner.html" with corp_name="Dsky" tutorial="Python" corp_data="2026" city="Sochi" site="=)" %}
-    {% endblock footer %}
-</body>
-</html>

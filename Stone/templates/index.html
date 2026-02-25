@@ -1,30 +1,118 @@
-<!DOCTYPE html>
 {% extends "base.html" %}
 {% load static %}
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
-    <title>Document: Index</title>
-</head>
-{% block title %}Index{% endblock title %}
-{% block header %}Главная{% endblock header %}
+
+{% block title %}Stone Store - Изделия из исскуственного камня{% endblock %}
+
 {% block content %}
-<body class="bg-image">
-    <div class="content">
-        <h1>Привет страница индекса!</h1>
-        <p> Раздел: {{header}} </p>
-        <p> Язык программирования: {{langs.0}} </p>
-        <p> Ваше Имя: {{name}}, Ваш возраст:{{age}} </p>
-        <p> Ваш Хост: {{host}} </p>
-        <p> Ваш метод: {{method}} </p>
-        <p> Ваш User_agent: {{user_agent}} </p>
-        <p> Ваш IP: {{ip}} </p>
-        <p> Ваш Path: {{path}} </p>
-        <p> Время: {{my_date|date:"d.m.Y"}} </p>
+<div class="hero-section">
+    <div class="hero-content">
+        <h1>Исскуственного камень для вашего дома</h1>
+        <p>Столешницы, Мойки, Умывальники и индивидуальные изделия из камня</p>
+        <div class="hero-buttons">
+            <a href="{% url 'catalog' %}" class="btn-primary">Смотреть каталог</a>
+            <a href="{% url 'by_product' %}" class="btn-secondary">Заказать расчет</a>
+        </div>
     </div>
-{% endblock content %}
-{% block footer %}{% include "banner.html" with corp_name="Dsky" tutorial="Python" corp_data="2026" city="Sochi"  %}{% endblock footer %}
-</body>
-</html>
+</div>
+
+{% if categories %}
+<div class="categories-section">
+    <h2>Категории камня</h2>
+    <div class="categories-grid">
+        {% for category in categories %}
+        <a href="{% url 'catalog' %}?category={{ category.slug }}" class="category-card">
+            {% if category.image %}
+            <img src="{{ category.image.url }}" alt="{{ category.name }}">
+            {% else %}
+            <div class="category-placeholder">💎</div>
+            {% endif %}
+            <h3>{{ category.name }}</h3>
+            <p>{{ category.description|truncatechars:100 }}</p>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if popular_stones %}
+<div class="popular-section">
+    <h2>Популярные камни</h2>
+    <div class="stones-grid">
+        {% for stone in popular_stones %}
+        <div class="stone-card">
+            <a href="{% url 'stone_detail' stone.slug %}">
+                <div class="stone-image">
+                    {% if stone.main_image %}
+                    <img src="{{ stone.main_image.url }}" alt="{{ stone.name }}">
+                    {% else %}
+                    <div class="no-image">💎</div>
+                    {% endif %}
+                    {% if stone.is_new %}
+                    <span class="badge-new">Новинка</span>
+                    {% endif %}
+                </div>
+                <div class="stone-info">
+                    <h3>{{ stone.name }}</h3>
+                    <p class="stone-category">{{ stone.category.name }}</p>
+                    <p class="stone-price">{{ stone.price_per_sqm }} ₽/м²</p>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if recent_reviews %}
+<div class="reviews-section">
+    <h2>Последние отзывы</h2>
+    <div class="reviews-grid">
+        {% for review in recent_reviews %}
+        <div class="review-card">
+            <div class="review-header">
+                <span class="review-name">{{ review.name }}</span>
+                {% if review.rating %}
+                <span class="review-rating">
+                    {% for i in "12345"|make_list %}
+                        {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                    {% endfor %}
+                </span>
+                {% endif %}
+            </div>
+            <p class="review-message">{{ review.message|truncatechars:150 }}</p>
+            <span class="review-date">{{ review.created_at|date:"d.m.Y" }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="text-center">
+        <a href="{% url 'questions' %}" class="btn-link">Все отзывы →</a>
+    </div>
+</div>
+{% endif %}
+
+<div class="features-section">
+    <h2>Почему выбирают нас</h2>
+    <div class="features-grid">
+        <div class="feature">
+            <div class="feature-icon">💎</div>
+            <h3>Исскуственный камень</h3>
+            <p>Только сертифицированный материал</p>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">✂️</div>
+            <h3>Опыт работы более 13 лет</h3>
+            <p>Современное оборудование для идеального результата</p>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">🚚</div>
+            <h3>Доставка и монтаж</h3>
+            <p>Профессиональная доставка и в другие регионы РФ</p>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">⭐</div>
+            <h3>Гарантия 5 лет</h3>
+            <p>Даем гарантию на все изделия из камня</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

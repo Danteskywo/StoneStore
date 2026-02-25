@@ -1,23 +1,80 @@
-<!DOCTYPE html>
 {% extends "base.html" %}
 {% load static %}
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document: Contacts</title>
-    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
-</head>
-<body>
-    {% block title%}Контакты{% endblock title %}
-    {% block header%}Контакты{% endblock header %}
-    {% block content %}
-    <p>Email: skywo@mail.ru</p>
-    <p>Номер телефона: +79287207877</p>
-    <p>Адрес: город Нальчик</p>
-    <p>Карта: </p>
-    {% endblock content %}
-    {% block footer %}{% include "banner.html" with corp_name="Dsky" tutorial="Python" corp_data="2026" city="Sochi" site="=)" %}{% endblock footer %}
-</body>
-</body>
-</html>
+
+{% block title %}Контакты - StoneStore{% endblock %}
+
+{% block content %}
+<div class="contact-page">
+    <div class="contact-header">
+        <h1>Контакты</h1>
+        <p>Свяжитесь с нами любым удобным способом</p>
+    </div>
+
+    <div class="contact-content">
+        <div class="contact-info">
+            <div class="info-card">
+                <div class="info-icon">📞</div>
+                <h3>Телефон</h3>
+                <p><a href="tel:+79287207877">+7 (928) 720-78-77</a></p>
+                <p>Ежедневно с 9:00 до 19:00</p>
+            </div>
+
+            <div class="info-card">
+                <div class="info-icon">✉️</div>
+                <h3>Email</h3>
+                <p><a href="mailto:skywo@mail.ru">skywo@mail.ru</a></p>
+                <p>Ответим в течение 24 часов</p>
+            </div>
+
+            <div class="info-card">
+                <div class="info-icon">📍</div>
+                <h3>Адрес</h3>
+                <p>г. Нальчик, ул. Каменная, 15</p>
+                <p>Офис и производство</p>
+            </div>
+
+            <div class="info-card">
+                <div class="info-icon">🕒</div>
+                <h3>Режим работы</h3>
+                <p>Пн-Пт: 9:00 - 19:00</p>
+                <p>Сб: 10:00 - 16:00</p>
+                <p>Вс: выходной</p>
+            </div>
+        </div>
+
+        <div class="contact-form-container">
+            <h2>Напишите нам</h2>
+            <form method="post" class="contact-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Ваше имя</label>
+                    <input type="text" name="name" required placeholder="Иванов Иван">
+                </div>
+                <div class="form-group">
+                    <label>Ваш email</label>
+                    <input type="email" name="email" required placeholder="email@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Сообщение</label>
+                    <textarea name="message" rows="5" required placeholder="Напишите ваш вопрос..."></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Отправить сообщение</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="map-section">
+        <h2>Как нас найти</h2>
+        <div class="map-container">
+            <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2905.788329566345!2d43.61731531547715!3d43.45150277912867!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDPCsDI3JzA1LjQiTiA0M8KwMzcnMTIuMSJF!5e0!3m2!1sru!2sru!4v1620000000000!5m2!1sru!2sru" 
+                width="100%" 
+                height="400" 
+                style="border:0;" 
+                allowfullscreen="" 
+                loading="lazy">
+            </iframe>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,16 +1,89 @@
 <!DOCTYPE html>
 {% load static %}
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %} title Base{% endblock title %}</title>
+    <title>{% block title %}Stone Store - Магазин натурального камня{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div><a href="/index">Главная</a> | <a href="/about">О Нас</a>|<a href="/by_product">Купить</a>|<a href="/gallery">Галерея</a>|<a href="/questions">Оставить отзыв или вопрос</a></div>
-    <h1>{% block header %}{% endblock header %}</h1>
-    <div>{% block content%}{% endblock content %}</div>
-    <div>{% block footer %}{% endblock footer %}<div>
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="{% url 'home' %}">
+                    <span class="logo-icon">💎</span>
+                    <span class="logo-text">StoneStore</span>
+                </a>
+            </div>
+            <nav class="main-nav">
+                <a href="{% url 'home' %}" {% if request.path == '/' %}class="active"{% endif %}>Главная</a>
+                <a href="{% url 'catalog' %}" {% if 'catalog' in request.path %}class="active"{% endif %}>Каталог</a>
+                <a href="{% url 'gallery' %}" {% if 'gallery' in request.path %}class="active"{% endif %}>Галерея</a>
+                <a href="{% url 'by_product' %}" {% if 'order' in request.path %}class="active"{% endif %}>Заказать</a>
+                <a href="{% url 'questions' %}" {% if 'questions' in request.path %}class="active"{% endif %}>Отзывы</a>
+                <a href="{% url 'about' %}" {% if 'about' in request.path %}class="active"{% endif %}>О нас</a>
+                <a href="{% url 'contact' %}" {% if 'contact' in request.path %}class="active"{% endif %}>Контакты</a>
+            </nav>
+            <div class="header-contacts">
+                <a href="tel:+79287207877" class="phone">+7 (928) 720-78-77</a>
+            </div>
+        </div>
+    </header>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+            {{ message }}
+            <button class="close-btn" onclick="this.parentElement.remove()">×</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>StoneStore</h3>
+                <p>Цех по изготовлению изделий из искусственному камню для вашего дома</p>
+            </div>
+            <div class="footer-section">
+                <h3>Контакты</h3>
+                <p>📍 Нальчик, ул. Мало-Садовая, 5</p>
+                <p>📞 +7 (928) 720-78-77</p>
+                <p>✉️ skywo@mail.ru</p>
+            </div>
+            <div class="footer-section">
+                <h3>Часы работы</h3>
+                <p>Пн-Пт: 9:00 - 19:00</p>
+                <p>Сб: 10:00 - 16:00</p>
+                <p>Вс: выходной</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 StoneStore. Все права защищены.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.querySelectorAll('.close-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.parentElement.remove();
+            });
+        });
+
+        setTimeout(() => {
+            document.querySelectorAll('.message').forEach(msg => {
+                msg.remove();
+            });
+        }, 5000);
+    </script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>
