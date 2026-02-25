@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+    <title>{% block title %}Создание покупки{% endblock title %}</title>
+</head>
+<body>
+    {% block content %}
+    <div class="container">
+        <h1>📝 Создание новой покупки</h1>
+        
+        <!-- Отображение сообщений -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Форма создания покупки -->
+        <form method="post">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div class="errorlist">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+            
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <ul class="errorlist">
+                    {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% if field.help_text %}
+                <small style="color: #6c757d;">{{ field.help_text }}</small>
+                {% endif %}
+            </div>
+            {% endfor %}
+            
+            <div class="btn-group">
+                <button type="submit" class="btn btn-success">💾 Сохранить</button>
+                <a href="{% url 'pokupka_list' %}" class="btn btn-secondary">❌ Отмена</a>
+            </div>
+        </form>
+    </div>
+    {% endblock content %}
+    {% block footer %}
+    {% include "banner.html" with corp_name="Dsky" tutorial="Python" corp_data="2026" city="Sochi" site="=)" %}
+    {% endblock footer %}
+</body>
+</html>

@@ -1,4 +1,5 @@
 from django import forms
+from .models import Pokupka
 
 CHOICE_TYPE = [
     ("review", "Отзыв"),
@@ -66,4 +67,50 @@ class ProductForm(forms.Form):
         initial="call"
     )
 
+class PokupkaForm(forms.ModelForm):
+    class Meta:
+        model = Pokupka
+        fields = ['product_name', 'quantity', 'price', 'customer_name', 
+                 'phone', 'delivery_address', 'by_models_order']
+        widgets = {
+            'product_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Например: Столешница 2.4м'
+            }),
+            'quantity': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 1,
+                'value': 1
+            }),
+            'price': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': '0.00'
+            }),
+            'customer_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ваше имя'
+            }),
+            'phone': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '+7 (999) 123-45-67'
+            }),
+            'delivery_address': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Адрес доставки'
+            }),
+            'by_models_order': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+        }
+        labels = {
+            'product_name': 'Название товара',
+            'quantity': 'Количество',
+            'price': 'Цена (₽)',
+            'customer_name': 'Имя покупателя',
+            'phone': 'Телефон',
+            'delivery_address': 'Адрес доставки',
+            'by_models_order': 'Связать с заказом (необязательно)',
+        }
 

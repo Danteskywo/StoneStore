@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseBadRequest, JsonResponse
 
@@ -9,11 +9,11 @@ from django.template.response import TemplateResponse
 
 from django.contrib import messages
 
-from django.db.models import Q, Avg
-from datetime import datetime
+from django.db.models import Q, Avg, Sum, Count
+from datetime import datetime, timedelta
 
-from .forms import UserForm, ProductForm
-from .models import Feedback, ByModels
+from .forms import UserForm, ProductForm, PokupkaForm
+from .models import Feedback, ByModels, Pokupka
 
 def index(request):
     header = "Данные пользователя"
@@ -139,7 +139,7 @@ def questions(request):
             Q(message__icontains=search_query)  
         )
     
-    if sort_by == 'reting_asc':
+    if sort_by == 'rating_asc':
         feedbacks = feedbacks.order_by('rating')
     elif sort_by == 'rating_desc':
         feedbacks = feedbacks.order_by('-rating')
@@ -193,6 +193,68 @@ def user(request):
     name = request.GET.get("name", "Неопределено")
     age = request.GET.get("age", 0)
     return HttpResponse(f"<h2>Имя:{name} Возраст:{age}</h2>")
+
+def pokupka_list(request):
+    pokupki = Pokupka.objects.all()
+    status_filter = request.GET.get('status','all')
+    if status_filter != 'all':
+        pokupki = pokupki.filter(status=status_filter)
+
+    search_query = request.GET.get('search','')
+    if search_query:
+        pokupki = pokupki.filter(
+            Q(product_name__icontains=search_query)|
+            Q(customer_name__icontains=search_query)
+        )
+
+    date_filter = request.GET.get('date','all')
+    if date_filter == 'week':
+        week_go = datetime.now() - timedelta(days=7)
+        pokupki = pokupki.filter(created_at__gte=week_go)
+    elif date_filter == "month":
+        month_ago = datetime.now() - timedelta(days=30)
+        pokupki = pokupki.filter(created_at__gte=month_ago)
+
+    total_count = pokupki.count()
+    total_sum = pokupki.aggregate(total=Sum('price'))['total'] or 0
+    avg_price = pokupki.aggregate(avg=Avg('price'))['avg'] or 0
+
+    paginator = Paginator(pokupki, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'total_count': total_count,
+        'total_sum': total_sum,
+        'avg_price': avg_price,
+        'current_status': status_filter,
+        'search_query': search_query,
+        'date_filter': date_filter,
+    }
+    return render (request, 'pokupka_list.html', context)
+    
+def create_pokupka(request):
+    if request.method == 'POST':
+        form = PokupkaForm(request.POST)
+        if form.is_valid():
+            pokupka = form.save()
+            messages.success(request, f'Покупка "{pokupka.product_name}" успешно создана!')
+            return redirect('pokupka_list')
+        # Если форма не валидна, показываем форму с ошибками
+    else:
+        # GET запрос - создаем пустую форму
+        form = PokupkaForm()
+    
+    # Для обоих случаев (GET и невалидный POST) настраиваем queryset и рендерим шаблон
+    form.fields['by_models_order'].queryset = ByModels.objects.all().order_by('-created_at')
+    return render(request, 'create_pokupka.html', {'form': form})
+
+def pokupka_detail(request, pk):
+    pokupka = get_object_or_404(Pokupka, pk=pk)
+    return render (request, 'pokupka_detail.html', {'pokupka':pokupka})
+        
+
 
 ############################
 class Person:

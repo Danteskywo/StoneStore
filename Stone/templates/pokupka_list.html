@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+    <title>{% block title %} Лист покупок {% endblock title %}</title>
+</head>
+<body>
+    {% block content %}
+<div class="pokupki-container">
+    <!-- Заголовок -->
+    <div class="page-header">
+        <h1 class="page-title">📦 История покупок</h1>
+        <a href="{% url 'create_pokupka' %}" class="btn btn-primary">
+            ➕ Новая покупка
+        </a>
+    </div>
+
+    <!-- Статистика -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-content">
+                <span class="stat-label">Всего покупок</span>
+                <span class="stat-value">{{ total_count }}</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-content">
+                <span class="stat-label">Общая сумма</span>
+                <span class="stat-value">{{ total_sum|floatformat:2 }} ₽</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📈</div>
+            <div class="stat-content">
+                <span class="stat-label">Средний чек</span>
+                <span class="stat-value">{{ avg_price|floatformat:2 }} ₽</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Фильтры -->
+    <div class="filters-section">
+        <form method="get" class="filter-form">
+            <div class="filter-group">
+                <input type="text" name="search" value="{{ search_query }}" 
+                       placeholder="🔍 Поиск по товару или имени..." 
+                       class="filter-input">
+            </div>
+            
+            <div class="filter-group">
+                <select name="status" class="filter-select">
+                    <option value="all" {% if current_status == 'all' %}selected{% endif %}>
+                        Все статусы
+                    </option>
+                    <option value="new" {% if current_status == 'new' %}selected{% endif %}>
+                        ✅ Новые
+                    </option>
+                    <option value="processing" {% if current_status == 'processing' %}selected{% endif %}>
+                        ⏳ В обработке
+                    </option>
+                    <option value="completed" {% if current_status == 'completed' %}selected{% endif %}>
+                        ✔️ Завершенные
+                    </option>
+                    <option value="cancelled" {% if current_status == 'cancelled' %}selected{% endif %}>
+                        ❌ Отмененные
+                    </option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <select name="date" class="filter-select">
+                    <option value="all" {% if date_filter == 'all' %}selected{% endif %}>
+                        За всё время
+                    </option>
+                    <option value="week" {% if date_filter == 'week' %}selected{% endif %}>
+                        За неделю
+                    </option>
+                    <option value="month" {% if date_filter == 'month' %}selected{% endif %}>
+                        За месяц
+                    </option>
+                </select>
+            </div>
+            
+            <div class="filter-group filter-actions">
+                <button type="submit" class="btn btn-filter">Применить</button>
+                <a href="{% url 'pokupka_list' %}" class="btn btn-reset">Сброс</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Список покупок -->
+    <div class="pokupki-list">
+        {% for pokupka in page_obj %}
+        <div class="pokupka-card status-{{ pokupka.status }}">
+            <div class="pokupka-header">
+                <div class="pokupka-title">
+                    <h3>{{ pokupka.product_name }}</h3>
+                    <span class="pokupka-id">#{{ pokupka.id }}</span>
+                </div>
+                <span class="status-badge status-{{ pokupka.status }}">
+                    {{ pokupka.get_status_display }}
+                </span>
+            </div>
+            
+            <div class="pokupka-body">
+                <div class="pokupka-info">
+                    <div class="info-row">
+                        <span class="info-label">👤 Покупатель:</span>
+                        <span class="info-value">{{ pokupka.customer_name }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">📞 Телефон:</span>
+                        <span class="info-value">{{ pokupka.phone }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">📦 Количество:</span>
+                        <span class="info-value">{{ pokupka.quantity }} шт.</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">💰 Цена:</span>
+                        <span class="info-value">{{ pokupka.price }} ₽</span>
+                    </div>
+                    <div class="info-row total">
+                        <span class="info-label">💵 Итого:</span>
+                        <span class="info-value">{{ pokupka.total_price }} ₽</span>
+                    </div>
+                </div>
+                
+                {% if pokupka.delivery_address %}
+                <div class="pokupka-address">
+                    📍 {{ pokupka.delivery_address }}
+                </div>
+                {% endif %}
+                
+                {% if pokupka.by_models_order %}
+                <div class="pokupka-related">
+                    🔗 Связан с заказом #{{ pokupka.by_models_order.id }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="pokupka-footer">
+                <span class="pokupka-date">
+                    📅 {{ pokupka.created_at|date:"d.m.Y H:i" }}
+                </span>
+                <a href="{% url 'pokupka_detail' pokupka.id %}" class="btn-detail">
+                    Подробнее →
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <h3>Пока нет покупок</h3>
+            <p>Создайте первую покупку, чтобы она появилась здесь</p>
+            <a href="{% url 'create_pokupka' %}" class="btn btn-primary">
+                Создать покупку
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Пагинация -->
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if current_status != 'all' %}&status={{ current_status }}{% endif %}{% if date_filter != 'all' %}&date={{ date_filter }}{% endif %}" class="page-link">&laquo;</a>
+        <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_status != 'all' %}&status={{ current_status }}{% endif %}{% if date_filter != 'all' %}&date={{ date_filter }}{% endif %}" class="page-link">&lsaquo;</a>
+        {% endif %}
+        
+        <span class="current-page">{{ page_obj.number }}</span>
+        
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_status != 'all' %}&status={{ current_status }}{% endif %}{% if date_filter != 'all' %}&date={{ date_filter }}{% endif %}" class="page-link">&rsaquo;</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_status != 'all' %}&status={{ current_status }}{% endif %}{% if date_filter != 'all' %}&date={{ date_filter }}{% endif %}" class="page-link">&raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% endblock content %}
+    {% block footer %}
+    {% include "banner.html" with corp_name="Dsky" tutorial="Python" corp_data="2026" city="Sochi" site="=)" %}
+    {% endblock footer %}
+</div>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+    <title>{% block title %} Детализация покупки #{{pokupka.id}}{% endblock title %}</title>
+</head>
+<body>
+    {% block content %}
+<div class="pokupka-detail-container">
+    <div class="detail-header">
+        <h1>Детали покупки #{{ pokupka.id }}</h1>
+        <a href="{% url 'pokupka_list' %}" class="btn btn-secondary">← Назад к списку</a>
+    </div>
+
+    <div class="detail-card">
+        <div class="detail-section">
+            <h3>Информация о товаре</h3>
+            <p><strong>Товар:</strong> {{ pokupka.product_name }}</p>
+            <p><strong>Количество:</strong> {{ pokupka.quantity }} шт.</p>
+            <p><strong>Цена за единицу:</strong> {{ pokupka.price }} ₽</p>
+            <p><strong>Общая стоимость:</strong> {{ pokupka.total_price }} ₽</p>
+        </div>
+
+        <div class="detail-section">
+            <h3>Информация о покупателе</h3>
+            <p><strong>Имя:</strong> {{ pokupka.customer_name }}</p>
+            <p><strong>Телефон:</strong> {{ pokupka.phone }}</p>
+            {% if pokupka.delivery_address %}
+            <p><strong>Адрес доставки:</strong> {{ pokupka.delivery_address }}</p>
+            {% endif %}
+        </div>
+
+        <div class="detail-section">
+            <h3>Статус и даты</h3>
+            <p><strong>Статус:</strong> {{ pokupka.get_status_display }}</p>
+            <p><strong>Дата создания:</strong> {{ pokupka.created_at|date:"d.m.Y H:i" }}</p>
+            <p><strong>Дата обновления:</strong> {{ pokupka.updated_at|date:"d.m.Y H:i" }}</p>
+        </div>
+
+        {% if pokupka.by_models_order %}
+        <div class="detail-section">
+            <h3>Связанный заказ</h3>
+            <p><strong>Заказ #{{ pokupka.by_models_order.id }}</strong></p>
+            <p>Имя: {{ pokupka.by_models_order.name }}</p>
+            <p>Телефон: {{ pokupka.by_models_order.numTel }}</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endblock content %}
+</div>
+</body>
+</html>
