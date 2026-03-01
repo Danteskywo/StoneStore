@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Заказать замер - StoneStore{% endblock %}
+
+{% block content %}
+<div class="measurement-page">
+    <div class="measurement-header">
+        <h1 data-i18n="📏 Бесплатный замер">📏 Бесплатный замер</h1>
+        <p data-i18n="Наш специалист приедет на объект и сделает точные замеры">Наш специалист приедет на объект и сделает точные замеры</p>
+    </div>
+    
+    <div class="measurement-content">
+        <div class="measurement-info">
+            <div class="info-block">
+                <h3 data-i18n="Почему нужен замер?">Почему нужен замер?</h3>
+                <ul>
+                    <li data-i18n="✓ Точный расчет стоимости">✓ Точный расчет стоимости</li>
+                    <li data-i18n="✓ Учет всех особенностей помещения">✓ Учет всех особенностей помещения</li>
+                    <li data-i18n="✓ Профессиональные рекомендации">✓ Профессиональные рекомендации</li>
+                    <li data-i18n="✓ Минимизация отходов материала">✓ Минимизация отходов материала</li>
+                </ul>
+            </div>
+            
+            <div class="info-block">
+                <h3 data-i18n="Как проходит замер?">Как проходит замер?</h3>
+                <ol>
+                    <li data-i18n="Вы оставляете заявку">Вы оставляете заявку</li>
+                    <li data-i18n="Мы согласовываем удобное время">Мы согласовываем удобное время</li>
+                    <li data-i18n="Специалист выезжает на объект">Специалист выезжает на объект</li>
+                    <li data-i18n="Производит все необходимые замеры">Производит все необходимые замеры</li>
+                    <li data-i18n="Дает рекомендации по монтажу">Дает рекомендации по монтажу</li>
+                </ol>
+            </div>
+            
+            <div class="info-block highlight">
+                <h3 data-i18n="Сроки">Сроки</h3>
+                <p data-i18n="Выезд специалиста в течение 1-2 рабочих дней">Выезд специалиста в течение 1-2 рабочих дней</p>
+                <p data-i18n="Продолжительность замера: 30-60 минут">Продолжительность замера: 30-60 минут</p>
+                <p data-i18n="Готовность расчета: в день замера">Готовность расчета: в день замера</p>
+            </div>
+        </div>
+        
+        <div class="measurement-form-container">
+            <h2 data-i18n="Заполните форму">Заполните форму</h2>
+            
+            <form method="post" class="measurement-form">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label data-i18n="Ваше имя *">Ваше имя *</label>
+                    <input type="text" name="name" required class="form-control" data-i18n-placeholder="Иванов Иван" placeholder="Иванов Иван">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-i18n="Телефон *">Телефон *</label>
+                        <input type="text" name="phone" required class="form-control phone-mask" data-i18n-placeholder="+7 (999) 123-45-67" placeholder="+7 (999) 123-45-67">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label data-i18n="Email">Email</label>
+                        <input type="email" name="email" class="form-control" data-i18n-placeholder="email@example.com" placeholder="email@example.com">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label data-i18n="Адрес объекта *">Адрес объекта *</label>
+                    <textarea name="address" required class="form-control" rows="3" data-i18n-placeholder="Укажите адрес" placeholder="Укажите адрес"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-i18n="Тип изделия">Тип изделия</label>
+                        <select name="product_type" class="form-control">
+                            <option value="countertop" data-i18n="Столешница">Столешница</option>
+                            <option value="window_sill" data-i18n="Подоконник">Подоконник</option>
+                            <option value="stairs" data-i18n="Ступени">Ступени</option>
+                            <option value="other" data-i18n="Другое">Другое</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label data-i18n="Интересующий камень">Интересующий камень</label>
+                        <select name="stone" class="form-control">
+                            <option value="" data-i18n="Не выбран">Не выбран</option>
+                            {% for stone in stones %}
+                            <option value="{{ stone.id }}">{{ stone.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-i18n="Предпочтительная дата">Предпочтительная дата</label>
+                        <input type="date" name="preferred_date" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label data-i18n="Удобное время">Удобное время</label>
+                        <select name="preferred_time" class="form-control">
+                            <option value="" data-i18n="Удобное время">Удобное время</option>
+                            <option value="9-12" data-i18n="9:00 - 12:00">9:00 - 12:00</option>
+                            <option value="12-15" data-i18n="12:00 - 15:00">12:00 - 15:00</option>
+                            <option value="15-18" data-i18n="15:00 - 18:00">15:00 - 18:00</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label data-i18n="Комментарий">Комментарий</label>
+                    <textarea name="comment" class="form-control" rows="2" data-i18n-placeholder="Дополнительные пожелания" placeholder="Дополнительные пожелания"></textarea>
+                </div>
+                
+                <button type="submit" class="btn-submit" data-i18n="Отправить заявку">Отправить заявку</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="measurement-guide-link">
+        <h2 data-i18n="Хотите сделать замер самостоятельно?">Хотите сделать замер самостоятельно?</h2>
+        <p data-i18n="Ознакомьтесь с нашей инструкцией">Ознакомьтесь с нашей инструкцией</p>
+        <a href="{% url 'measurement_guide' %}" class="btn-secondary" data-i18n="Инструкция по замеру">Инструкция по замеру</a>
+    </div>
+</div>
+
+<style>
+.measurement-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.measurement-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.measurement-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.measurement-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 50px;
+}
+
+.measurement-info {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.info-block {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: var(--shadow-light);
+}
+
+.info-block h3 {
+    margin-bottom: 15px;
+    color: var(--primary);
+}
+
+.info-block ul,
+.info-block ol {
+    padding-left: 20px;
+    color: var(--gray);
+}
+
+.info-block li {
+    margin-bottom: 10px;
+}
+
+.info-block.highlight {
+    background: var(--gradient-1);
+    color: white;
+}
+
+.info-block.highlight h3 {
+    color: white;
+}
+
+.info-block.highlight p {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.measurement-form-container {
+    background: white;
+    border-radius: 30px;
+    padding: 40px;
+    box-shadow: var(--shadow);
+}
+
+.measurement-form-container h2 {
+    margin-bottom: 30px;
+    color: var(--dark);
+}
+
+.measurement-form .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.measurement-guide-link {
+    text-align: center;
+    padding: 40px;
+    background: white;
+    border-radius: 30px;
+    box-shadow: var(--shadow-light);
+}
+
+.measurement-guide-link h2 {
+    margin-bottom: 10px;
+    color: var(--dark);
+}
+
+.measurement-guide-link p {
+    color: var(--gray);
+    margin-bottom: 20px;
+}
+
+@media (max-width: 992px) {
+    .measurement-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .measurement-form .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

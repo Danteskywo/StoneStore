@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Сравнение камней - StoneStore{% endblock %}
+
+{% block content %}
+<div class="comparison-page">
+    <div class="page-header">
+        <h1 data-i18n="⚖️ Сравнение камней">⚖️ Сравнение камней</h1>
+        <p data-i18n="Сравните характеристики и выберите лучший вариант">Сравните характеристики и выберите лучший вариант</p>
+    </div>
+    
+    {% if stones %}
+    <div class="comparison-table-wrapper">
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th class="char-title" data-i18n="Характеристика">Характеристика</th>
+                    {% for stone in stones %}
+                    <th class="stone-header">
+                        <div class="stone-info">
+                            <button class="remove-compare" onclick="removeFromCompare({{ stone.id }})">
+                                ✕
+                            </button>
+                            {% if stone.main_image %}
+                            <img src="{{ stone.main_image.url }}" alt="{{ stone.name }}">
+                            {% else %}
+                            <div class="no-image">💎</div>
+                            {% endif %}
+                            <h3>{{ stone.name }}</h3>
+                            <p class="category">{{ stone.category.name }}</p>
+                            <a href="{% url 'stone_detail' stone.slug %}" class="btn-view" data-i18n="Подробнее">Подробнее</a>
+                        </div>
+                    </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in characteristics %}
+                <tr>
+                    <td class="char-title">{{ row.title }}</td>
+                    {% for value in row.values %}
+                    <td class="char-value">{{ value }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                
+                <tr class="actions-row">
+                    <td></td>
+                    {% for stone in stones %}
+                    <td>
+                        <button class="btn-order" onclick="quickOrder({{ stone.id }})" data-i18n="Заказать">Заказать</button>
+                    </td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">⚖️</div>
+        <h3 data-i18n="Нет камней для сравнения">Нет камней для сравнения</h3>
+        <p data-i18n="Добавьте камни из каталога, чтобы сравнить их характеристики">Добавьте камни из каталога, чтобы сравнить их характеристики</p>
+        <a href="{% url 'catalog' %}" class="btn-primary" data-i18n="Перейти в каталог">Перейти в каталог</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.comparison-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 15px;
+}
+
+.page-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.comparison-table-wrapper {
+    overflow-x: auto;
+    background: var(--bg-primary);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 20px;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+.comparison-table th,
+.comparison-table td {
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.comparison-table th {
+    background: var(--bg-secondary);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.stone-header {
+    min-width: 250px;
+    vertical-align: top;
+}
+
+.stone-info {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.remove-compare {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--danger);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.remove-compare:hover {
+    transform: scale(1.1);
+}
+
+.stone-info img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.no-image {
+    width: 150px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary-light) 100%);
+    border-radius: 10px;
+    color: white;
+}
+
+.stone-info h3 {
+    margin: 5px 0;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+}
+
+.category {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.btn-view {
+    padding: 8px 20px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    text-decoration: none;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.btn-view:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.char-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+}
+
+.char-value {
+    color: var(--text-secondary);
+}
+
+.actions-row td {
+    padding: 20px 15px;
+}
+
+.btn-order {
+    padding: 12px 25px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-order:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    background: var(--bg-primary);
+    border-radius: 30px;
+    box-shadow: var(--shadow);
+}
+
+.empty-icon {
+    font-size: 5rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+}
+</style>
+
+<script>
+function removeFromCompare(stoneId) {
+    fetch(`/compare/remove/${stoneId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(translate('Ошибка:') + ' ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert(translate('Ошибка соединения'));
+    });
+}
+
+function quickOrder(stoneId) {
+    window.location.href = `/order/?stone=${stoneId}`;
+}
+</script>
+{% endblock %}

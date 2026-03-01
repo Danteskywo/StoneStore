@@ -1,0 +1,332 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Результаты подбора - StoneStore{% endblock %}
+
+{% block content %}
+<div class="results-page">
+    <div class="results-header">
+        <h1 data-i18n="✨ Ваш результат">✨ Ваш результат</h1>
+        <p>{{ result.last_name }} {{ result.first_name }}, <span data-i18n="мы подобрали для вас идеальный камень">мы подобрали для вас идеальный камень</span></p>
+    </div>
+    
+    <div class="results-container">
+        <div class="result-card">
+            <div class="result-icon">🎯</div>
+            <h2 data-i18n="Вам идеально подойдет:">Вам идеально подойдет:</h2>
+            <div class="result-category">{{ recommended_name }}</div>
+            
+            <div class="score-bars">
+                <h3 data-i18n="Степень соответствия:">Степень соответствия:</h3>
+                
+                <div class="score-item">
+                    <span class="score-label" data-i18n="Гранит">Гранит</span>
+                    <div class="score-bar-container">
+                        <div class="score-bar" style="width: {{ scores.granite }}%"></div>
+                    </div>
+                    <span class="score-value">{{ scores.granite }}%</span>
+                </div>
+                
+                <div class="score-item">
+                    <span class="score-label" data-i18n="Мрамор">Мрамор</span>
+                    <div class="score-bar-container">
+                        <div class="score-bar" style="width: {{ scores.marble }}%"></div>
+                    </div>
+                    <span class="score-value">{{ scores.marble }}%</span>
+                </div>
+                
+                <div class="score-item">
+                    <span class="score-label" data-i18n="Кварцит">Кварцит</span>
+                    <div class="score-bar-container">
+                        <div class="score-bar" style="width: {{ scores.quartzite }}%"></div>
+                    </div>
+                    <span class="score-value">{{ scores.quartzite }}%</span>
+                </div>
+                
+                <div class="score-item">
+                    <span class="score-label" data-i18n="Травертин">Травертин</span>
+                    <div class="score-bar-container">
+                        <div class="score-bar" style="width: {{ scores.travertine }}%"></div>
+                    </div>
+                    <span class="score-value">{{ scores.travertine }}%</span>
+                </div>
+                
+                <div class="score-item">
+                    <span class="score-label" data-i18n="Сланец">Сланец</span>
+                    <div class="score-bar-container">
+                        <div class="score-bar" style="width: {{ scores.slate }}%"></div>
+                    </div>
+                    <span class="score-value">{{ scores.slate }}%</span>
+                </div>
+                
+                <div class="score-item">
+                    <span class="score-label" data-i18n="Оникс">Оникс</span>
+                    <div class="score-bar-container">
+                        <div class="score-bar" style="width: {{ scores.onyx }}%"></div>
+                    </div>
+                    <span class="score-value">{{ scores.onyx }}%</span>
+                </div>
+            </div>
+        </div>
+        
+        {% if recommended_stones %}
+        <div class="recommended-stones">
+            <h2 data-i18n="Рекомендуем обратить внимание:">Рекомендуем обратить внимание:</h2>
+            <div class="stones-grid">
+                {% for stone in recommended_stones %}
+                <div class="stone-card">
+                    <a href="{% url 'stone_detail' stone.slug %}">
+                        <div class="stone-image">
+                            {% if stone.main_image %}
+                            <img src="{{ stone.main_image.url }}" alt="{{ stone.name }}">
+                            {% else %}
+                            <div class="no-image">💎</div>
+                            {% endif %}
+                        </div>
+                        <div class="stone-info">
+                            <h3>{{ stone.name }}</h3>
+                            <p class="stone-category">{{ stone.category.name }}</p>
+                            <p class="stone-price">{{ stone.price_per_sqm|floatformat:0 }} ₽/м²</p>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="results-actions">
+            <a href="{% url 'quiz_start' %}" class="btn-secondary" data-i18n="Пройти заново">Пройти заново</a>
+            <a href="{% url 'catalog' %}" class="btn-primary" data-i18n="Смотреть все камни">Смотреть все камни</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.results-page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+
+.results-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.results-header h1 {
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 15px;
+}
+
+.results-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.results-container {
+    background: var(--bg-primary);
+    border-radius: 30px;
+    padding: 40px;
+    box-shadow: var(--shadow);
+}
+
+.result-card {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.result-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    animation: bounce 2s infinite;
+}
+
+.result-card h2 {
+    font-size: 1.8rem;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+}
+
+.result-category {
+    display: inline-block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    padding: 10px 30px;
+    border: 2px solid var(--secondary);
+    border-radius: 50px;
+    margin-bottom: 30px;
+}
+
+.score-bars {
+    max-width: 500px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.score-bars h3 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--text-secondary);
+}
+
+.score-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.score-label {
+    width: 100px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.score-bar-container {
+    flex: 1;
+    height: 12px;
+    background: var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.score-bar {
+    height: 100%;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    border-radius: 6px;
+    transition: width 1s ease;
+}
+
+.score-value {
+    width: 50px;
+    text-align: right;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.recommended-stones {
+    margin: 40px 0;
+}
+
+.recommended-stones h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+}
+
+.stones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.stone-card {
+    background: var(--bg-secondary);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.stone-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow);
+}
+
+.stone-card a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.stone-image {
+    height: 150px;
+    overflow: hidden;
+}
+
+.stone-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.stone-card:hover .stone-image img {
+    transform: scale(1.1);
+}
+
+.no-image {
+    width: 100%;
+    height: 100%;
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+}
+
+.stone-info {
+    padding: 15px;
+}
+
+.stone-info h3 {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    color: var(--text-primary);
+}
+
+.stone-category {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-bottom: 5px;
+}
+
+.stone-price {
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+.results-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 40px;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@media (max-width: 768px) {
+    .results-container {
+        padding: 20px;
+    }
+    
+    .result-category {
+        font-size: 1.5rem;
+        padding: 8px 20px;
+    }
+    
+    .score-item {
+        flex-wrap: wrap;
+    }
+    
+    .results-actions {
+        flex-direction: column;
+    }
+    
+    .results-actions a {
+        text-align: center;
+    }
+}
+</style>
+{% endblock %}

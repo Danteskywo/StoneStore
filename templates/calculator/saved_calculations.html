@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Мои расчеты - StoneStore{% endblock %}
+
+{% block content %}
+<div class="saved-calculations-page">
+    <div class="page-header">
+        <h1 data-i18n="💎 Мои сохраненные расчеты">💎 Мои сохраненные расчеты</h1>
+        <p data-i18n="Здесь хранятся все ваши предварительные расчеты столешниц">Здесь хранятся все ваши предварительные расчеты столешниц</p>
+    </div>
+    
+    {% if calculations %}
+    <div class="calculations-grid">
+        {% for calc in calculations %}
+        <div class="calculation-card" data-id="{{ calc.id }}">
+            <div class="card-header">
+                <h3>{{ calc.name }}</h3>
+                <span class="card-date">{{ calc.created_at|date:"d.m.Y" }}</span>
+            </div>
+            
+            <div class="card-stone">
+                <img src="{{ calc.stone.main_image.url }}" alt="{{ calc.stone.name }}">
+                <div class="stone-info">
+                    <strong>{{ calc.stone.name }}</strong>
+                    <span>{{ calc.stone.category.name }}</span>
+                </div>
+            </div>
+            
+            <div class="card-params">
+                <div class="param">
+                    <span class="param-label" data-i18n="Размеры:">Размеры:</span>
+                    <span class="param-value">{{ calc.length }} x {{ calc.width }} м</span>
+                </div>
+                <div class="param">
+                    <span class="param-label" data-i18n="Толщина:">Толщина:</span>
+                    <span class="param-value">{{ calc.thickness }} мм</span>
+                </div>
+                <div class="param">
+                    <span class="param-label" data-i18n="Кромка:">Кромка:</span>
+                    <span class="param-value">
+                        {% if calc.edge_type == 'straight' %}Прямая
+                        {% elif calc.edge_type == 'rounded' %}Закругленная
+                        {% else %}Скос{% endif %}
+                    </span>
+                </div>
+                <div class="param">
+                    <span class="param-label" data-i18n="Опции:">Опции:</span>
+                    <span class="param-value">
+                        {% if calc.has_sink_cutout %}Мойка{% endif %}
+                        {% if calc.has_hob_cutout %}{% if calc.has_sink_cutout %}, {% endif %}Плита{% endif %}
+                        {% if not calc.has_sink_cutout and not calc.has_hob_cutout %}Нет{% endif %}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="card-price">
+                <span class="price-label" data-i18n="Итоговая стоимость:">Итоговая стоимость:</span>
+                <span class="price-value">{{ calc.total_price|floatformat:0 }} ₽</span>
+            </div>
+            
+            <div class="card-actions">
+                <button class="btn-use" onclick="useCalculation({{ calc.id }})" data-i18n="Использовать">Использовать</button>
+                <button class="btn-delete" onclick="deleteCalculation({{ calc.id }})" data-i18n="Удалить">Удалить</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📐</div>
+        <h3 data-i18n="У вас пока нет сохраненных расчетов">У вас пока нет сохраненных расчетов</h3>
+        <p data-i18n="Воспользуйтесь калькулятором на странице камня, чтобы создать первый расчет">Воспользуйтесь калькулятором на странице камня, чтобы создать первый расчет</p>
+        <a href="{% url 'catalog' %}" class="btn-primary" data-i18n="Перейти в каталог">Перейти в каталог</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.saved-calculations-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    color: var(--dark);
+    margin-bottom: 10px;
+}
+
+.calculations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 25px;
+}
+
+.calculation-card {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.calculation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.card-header h3 {
+    font-size: 1.2rem;
+    color: var(--dark);
+}
+
+.card-date {
+    color: var(--gray);
+    font-size: 0.9rem;
+}
+
+.card-stone {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border);
+}
+
+.card-stone img {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.stone-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stone-info strong {
+    font-size: 1.1rem;
+    color: var(--dark);
+}
+
+.stone-info span {
+    color: var(--gray);
+    font-size: 0.9rem;
+}
+
+.card-params {
+    margin-bottom: 20px;
+}
+
+.param {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border);
+}
+
+.param-label {
+    color: var(--gray);
+}
+
+.param-value {
+    font-weight: 500;
+    color: var(--dark);
+}
+
+.card-price {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--gradient-1);
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.price-label {
+    font-size: 0.95rem;
+    opacity: 0.9;
+}
+
+.price-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.card-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.btn-use {
+    padding: 12px;
+    background: var(--secondary);
+    color: var(--dark);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-use:hover {
+    background: var(--secondary-light);
+    transform: translateY(-2px);
+}
+
+.btn-delete {
+    padding: 12px;
+    background: transparent;
+    color: var(--danger);
+    border: 2px solid var(--danger);
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-delete:hover {
+    background: var(--danger);
+    color: white;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 30px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.empty-icon {
+    font-size: 5rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    font-size: 1.8rem;
+    color: var(--dark);
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: var(--gray);
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+}
+</style>
+
+<script>
+function useCalculation(id) {
+    fetch(`/api/get-calculation/${id}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const params = new URLSearchParams(data.data);
+                window.location.href = `/order/?${params.toString()}`;
+            }
+        });
+}
+
+function deleteCalculation(id) {
+    if (confirm('Удалить этот расчет?')) {
+        fetch(`/api/delete-calculation/${id}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        }).then(() => {
+            document.querySelector(`[data-id="${id}"]`).remove();
+        });
+    }
+}
+</script>
+{% endblock %}

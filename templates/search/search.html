@@ -1,0 +1,522 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Поиск: {{ query }} - StoneStore{% endblock %}
+
+{% block extra_css %}
+<style>
+.search-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.search-header {
+    margin-bottom: 40px;
+}
+
+.search-header h1 {
+    font-size: 2.5rem;
+    color: var(--dark);
+    margin-bottom: 30px;
+}
+
+.search-box {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 20px 60px 20px 30px;
+    font-size: 1.2rem;
+    border: 2px solid var(--border);
+    border-radius: 50px;
+    transition: all 0.3s ease;
+}
+
+.search-box input:focus {
+    border-color: var(--secondary);
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+}
+
+.search-box button {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--primary);
+}
+
+.search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    z-index: 1000;
+    display: none;
+}
+
+.search-suggestions.active {
+    display: block;
+}
+
+.suggestion-item {
+    padding: 15px 25px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.suggestion-item:hover {
+    background: var(--surface);
+}
+
+.suggestion-item:first-child {
+    border-radius: 20px 20px 0 0;
+}
+
+.suggestion-item:last-child {
+    border-radius: 0 0 20px 20px;
+}
+
+.search-stats {
+    color: var(--gray);
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+
+.search-filters {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow-light);
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-group label {
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.filter-group input,
+.filter-group select {
+    padding: 12px;
+    border: 2px solid var(--surface);
+    border-radius: 10px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+    border-color: var(--secondary);
+    outline: none;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-apply {
+    padding: 12px 30px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-apply:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+}
+
+.btn-reset {
+    padding: 12px 30px;
+    background: var(--surface);
+    color: var(--dark);
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-reset:hover {
+    background: var(--border);
+}
+
+.search-sort {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+.search-sort select {
+    padding: 10px 20px;
+    border: 2px solid var(--surface);
+    border-radius: 10px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.search-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.result-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+    transition: all 0.3s ease;
+}
+
+.result-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow);
+}
+
+.result-card a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.result-image {
+    height: 200px;
+    overflow: hidden;
+    position: relative;
+}
+
+.result-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.result-card:hover .result-image img {
+    transform: scale(1.1);
+}
+
+.result-info {
+    padding: 20px;
+}
+
+.result-info h3 {
+    margin-bottom: 5px;
+    font-size: 1.2rem;
+    color: var(--dark);
+}
+
+.result-category {
+    color: var(--gray);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.result-price {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.relevance-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: var(--secondary);
+    color: var(--dark);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.no-results {
+    text-align: center;
+    padding: 60px;
+    background: white;
+    border-radius: 30px;
+    box-shadow: var(--shadow-light);
+}
+
+.no-results-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.no-results h3 {
+    font-size: 1.8rem;
+    color: var(--dark);
+    margin-bottom: 10px;
+}
+
+.no-results p {
+    color: var(--gray);
+    margin-bottom: 30px;
+}
+
+.search-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 40px;
+}
+
+.page-link {
+    padding: 10px 16px;
+    border: 2px solid var(--surface);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--dark);
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.page-link:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.page-link.active {
+    background: var(--gradient-1);
+    color: white;
+    border: none;
+}
+
+@media (max-width: 768px) {
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .search-results {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="search-page">
+    <div class="search-header">
+        <h1 data-i18n="🔍 Поиск камня">🔍 Поиск камня</h1>
+        
+        <div class="search-box">
+            <input type="text" 
+                   id="search-input" 
+                   data-i18n-placeholder="Введите название камня, цвет, текстуру..." 
+                   placeholder="Введите название камня, цвет, текстуру..." 
+                   value="{{ query }}"
+                   autocomplete="off">
+            <button type="button" id="search-btn">🔍</button>
+            
+            <div class="search-suggestions" id="suggestions"></div>
+        </div>
+        
+        {% if query %}
+        <div class="search-stats">
+            <span data-i18n="Найдено">Найдено</span> {{ results.total }} <span data-i18n="камней по запросу">камней по запросу</span> "{{ query }}"
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="search-filters">
+        <form method="get" id="filter-form">
+            <input type="hidden" name="q" value="{{ query }}">
+            
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label data-i18n="Категория">Категория</label>
+                    <select name="category">
+                        <option value="" data-i18n="Все категории">Все категории</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if filters.category == cat.id %}selected{% endif %}>
+                            {{ cat.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label data-i18n="Цена, ₽/м²">Цена, ₽/м²</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" name="min_price" data-i18n-placeholder="от" placeholder="от" value="{{ filters.min_price|default:'' }}">
+                        <input type="number" name="max_price" data-i18n-placeholder="до" placeholder="до" value="{{ filters.max_price|default:'' }}">
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label data-i18n="Твердость (мин)">Твердость (мин)</label>
+                    <select name="min_hardness">
+                        <option value="" data-i18n="Любая">Любая</option>
+                        <option value="3" {% if filters.min_hardness == 3 %}selected{% endif %} data-i18n="от 3 (Мягкий)">от 3 (Мягкий)</option>
+                        <option value="5" {% if filters.min_hardness == 5 %}selected{% endif %} data-i18n="от 5 (Средний)">от 5 (Средний)</option>
+                        <option value="7" {% if filters.min_hardness == 7 %}selected{% endif %} data-i18n="от 7 (Твердый)">от 7 (Твердый)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="filter-actions">
+                <button type="submit" class="btn-apply" data-i18n="Применить фильтры">Применить фильтры</button>
+                <a href="{% url 'search' %}?q={{ query }}" class="btn-reset" data-i18n="Сбросить">Сбросить</a>
+            </div>
+        </form>
+    </div>
+    
+    <div class="search-sort">
+        <select name="sort" id="sort-select">
+            <option value="relevance" {% if sort_by == 'relevance' %}selected{% endif %} data-i18n="По релевантности">По релевантности</option>
+            <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %} data-i18n="Цена (по возрастанию)">Цена (по возрастанию)</option>
+            <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %} data-i18n="Цена (по убыванию)">Цена (по убыванию)</option>
+            <option value="hardness" {% if sort_by == 'hardness' %}selected{% endif %} data-i18n="По твердости">По твердости</option>
+        </select>
+    </div>
+    
+    {% if stones %}
+    <div class="search-results">
+        {% for stone in stones %}
+        <div class="result-card" data-relevance="{{ stone.relevance|default:1.0 }}">
+            <a href="{% url 'stone_detail' stone.slug %}">
+                <div class="result-image">
+                    {% if stone.main_image %}
+                    <img src="{{ stone.main_image.url }}" alt="{{ stone.name }}">
+                    {% else %}
+                    <div style="background: var(--surface); height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                        💎
+                    </div>
+                    {% endif %}
+                    <span class="relevance-badge">
+                        <span data-i18n="Точность:">Точность:</span> {{ stone.relevance|floatformat:1|default:"1.0" }}
+                    </span>
+                </div>
+                <div class="result-info">
+                    <h3>{{ stone.name }}</h3>
+                    <div class="result-category">{{ stone.category.name }}</div>
+                    <div class="result-price">{{ stone.price_per_sqm|floatformat:0 }} ₽/м²</div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if results.pages > 1 %}
+    <div class="search-pagination">
+        {% if results.page > 1 %}
+        <a href="?q={{ query }}&page={{ results.page|add:-1 }}{% for key, value in filters.items %}&{{ key }}={{ value }}{% endfor %}" class="page-link">‹</a>
+        {% endif %}
+        
+        {% for p in results.pages_range %}
+            {% if p == results.page %}
+            <span class="page-link active">{{ p }}</span>
+            {% else %}
+            <a href="?q={{ query }}&page={{ p }}{% for key, value in filters.items %}&{{ key }}={{ value }}{% endfor %}" class="page-link">{{ p }}</a>
+            {% endif %}
+        {% endfor %}
+        
+        {% if results.page < results.pages %}
+        <a href="?q={{ query }}&page={{ results.page|add:1 }}{% for key, value in filters.items %}&{{ key }}={{ value }}{% endfor %}" class="page-link">›</a>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <div class="no-results">
+        <div class="no-results-icon">😕</div>
+        <h3 data-i18n="Ничего не найдено">Ничего не найдено</h3>
+        <p data-i18n="Попробуйте изменить поисковый запрос или сбросить фильтры">Попробуйте изменить поисковый запрос или сбросить фильтры</p>
+        <a href="{% url 'catalog' %}" class="btn-primary" data-i18n="Перейти в каталог">Перейти в каталог</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const searchInput = document.getElementById('search-input');
+const suggestionsBox = document.getElementById('suggestions');
+let timeoutId;
+
+searchInput.addEventListener('input', function() {
+    clearTimeout(timeoutId);
+    const query = this.value.trim();
+    
+    if (query.length < 2) {
+        suggestionsBox.classList.remove('active');
+        return;
+    }
+    
+    timeoutId = setTimeout(() => {
+        fetch(`/api/search/suggest/?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.suggestions.length > 0) {
+                    suggestionsBox.innerHTML = data.suggestions.map(s => 
+                        `<div class="suggestion-item" onclick="window.location.href='/catalog/${s.slug}/'">
+                            ${s.text}
+                        </div>`
+                    ).join('');
+                    suggestionsBox.classList.add('active');
+                } else {
+                    suggestionsBox.classList.remove('active');
+                }
+            });
+    }, 300);
+});
+
+document.getElementById('search-btn').addEventListener('click', function() {
+    const query = searchInput.value.trim();
+    if (query) {
+        window.location.href = `/search/?q=${encodeURIComponent(query)}`;
+    }
+});
+
+searchInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        const query = this.value.trim();
+        if (query) {
+            window.location.href = `/search/?q=${encodeURIComponent(query)}`;
+        }
+    }
+});
+
+document.getElementById('sort-select').addEventListener('change', function() {
+    const url = new URL(window.location.href);
+    url.searchParams.set('sort', this.value);
+    window.location.href = url.toString();
+});
+
+document.addEventListener('click', function(e) {
+    if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+        suggestionsBox.classList.remove('active');
+    }
+});
+</script>
+{% endblock %}

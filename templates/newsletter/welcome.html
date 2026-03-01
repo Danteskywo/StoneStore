@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title data-i18n="Добро пожаловать!">Добро пожаловать!</title>
+    <style>
+        body {
+            font-family: 'Montserrat', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f5f5f5;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #d4af37;
+            color: #333;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 data-i18n="Добро пожаловать в StoneStore! 🎉">Добро пожаловать в StoneStore! 🎉</h1>
+    </div>
+    
+    <div class="content">
+        <p>Здравствуйте, {% if subscriber.name %}{{ subscriber.name }}{% else %}друг{% endif %}!</p>
+        
+        <p data-i18n="Спасибо за подписку на нашу рассылку. Теперь вы будете первым узнавать о:">Спасибо за подписку на нашу рассылку. Теперь вы будете первым узнавать о:</p>
+        
+        <ul>
+            <li data-i18n="✨ Новых поступлениях камня">✨ Новых поступлениях камня</li>
+            <li data-i18n="💰 Специальных предложениях">💰 Специальных предложениях</li>
+            <li data-i18n="🏗️ Готовых проектах и идеях дизайна">🏗️ Готовых проектах и идеях дизайна</li>
+            <li data-i18n="🎁 Эксклюзивных акциях для подписчиков">🎁 Эксклюзивных акциях для подписчиков</li>
+        </ul>
+        
+        <p data-i18n="А пока вы ждете новостей, предлагаем посмотреть наши популярные камни:">А пока вы ждете новостей, предлагаем посмотреть наши популярные камни:</p>
+        
+        <div style="text-align: center;">
+            <a href="https://stonestore.ru/catalog/" class="button" data-i18n="Перейти в каталог">Перейти в каталог</a>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p data-i18n="Вы получили это письмо, потому что подписались на рассылку StoneStore.">Вы получили это письмо, потому что подписались на рассылку StoneStore.</p>
+        <p data-i18n="Если вы не подписывались, просто проигнорируйте это письмо.">Если вы не подписывались, просто проигнорируйте это письмо.</p>
+        <p><a href="{{ unsubscribe_url }}" data-i18n="Отписаться от рассылки">Отписаться от рассылки</a></p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Заявка на замер принята - StoneStore{% endblock %}
+
+{% block content %}
+<div class="success-page">
+    <div class="success-container">
+        <div class="success-icon">📏</div>
+        <h1 data-i18n="Заявка на замер принята!">Заявка на замер принята!</h1>
+        <p class="success-message" data-i18n="Наш специалист свяжется с вами в ближайшее время для подтверждения">Наш специалист свяжется с вами в ближайшее время для подтверждения</p>
+        
+        <div class="next-steps">
+            <h2 data-i18n="Что дальше?">Что дальше?</h2>
+            <ol>
+                <li data-i18n="Мы позвоним вам в течение 30 минут в рабочее время">Мы позвоним вам в течение 30 минут в рабочее время</li>
+                <li data-i18n="Согласуем удобное время для замера">Согласуем удобное время для замера</li>
+                <li data-i18n="Наш специалист приедет на объект">Наш специалист приедет на объект</li>
+                <li data-i18n="После замера подготовим точный расчет">После замера подготовим точный расчет</li>
+            </ol>
+        </div>
+        
+        <div class="success-actions">
+            <a href="{% url 'catalog' %}" class="btn-primary" data-i18n="В каталог">В каталог</a>
+            <a href="{% url 'home' %}" class="btn-secondary" data-i18n="На главную">На главную</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

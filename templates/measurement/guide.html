@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Как правильно замерить столешницу - StoneStore{% endblock %}
+
+{% block content %}
+<div class="guide-page">
+    <div class="guide-header">
+        <h1 data-i18n="📏 Как правильно сделать замер">📏 Как правильно сделать замер</h1>
+        <p data-i18n="Пошаговая инструкция для самостоятельного замера">Пошаговая инструкция для самостоятельного замера</p>
+    </div>
+    
+    <div class="guide-content">
+        <div class="guide-section">
+            <h2 data-i18n="Шаг 1. Подготовка">Шаг 1. Подготовка</h2>
+            <div class="step-content">
+                <div class="step-text">
+                    <p data-i18n="Вам понадобятся:">Вам понадобятся:</p>
+                    <ul>
+                        <li data-i18n="✅ Рулетка (не менее 3 метров)">✅ Рулетка (не менее 3 метров)</li>
+                        <li data-i18n="✅ Уровень">✅ Уровень</li>
+                        <li data-i18n="✅ Бумага и карандаш">✅ Бумага и карандаш</li>
+                        <li data-i18n="✅ Телефон с камерой">✅ Телефон с камерой</li>
+                    </ul>
+                </div>
+                <div class="step-image">
+                    <img src="{% static 'images/guide/step1.jpg' %}" alt="Инструменты для замера">
+                </div>
+            </div>
+        </div>
+        
+        <div class="guide-section">
+            <h2 data-i18n="Шаг 2. Схема помещения">Шаг 2. Схема помещения</h2>
+            <div class="step-content">
+                <div class="step-text">
+                    <p data-i18n="Нарисуйте схему вашей кухни с указанием:">Нарисуйте схему вашей кухни с указанием:</p>
+                    <ul>
+                        <li data-i18n="📍 Расположения стен">📍 Расположения стен</li>
+                        <li data-i18n="📍 Углов и выступов">📍 Углов и выступов</li>
+                        <li data-i18n="📍 Коммуникаций">📍 Коммуникаций</li>
+                        <li data-i18n="📍 Существующей техники">📍 Существующей техники</li>
+                    </ul>
+                </div>
+                <div class="step-image">
+                    <img src="{% static 'images/guide/step2.jpg' %}" alt="Схема помещения">
+                </div>
+            </div>
+        </div>
+        
+        <div class="guide-section">
+            <h2 data-i18n="Шаг 3. Основные размеры">Шаг 3. Основные размеры</h2>
+            <div class="step-content">
+                <div class="step-text">
+                    <p data-i18n="Измерьте:">Измерьте:</p>
+                    <ul>
+                        <li data-i18n="📐 Длину столешницы">📐 Длину столешницы</li>
+                        <li data-i18n="📐 Глубину столешницы">📐 Глубину столешницы</li>
+                        <li data-i18n="📐 Толщину">📐 Толщину</li>
+                        <li data-i18n="📐 Высоту от пола">📐 Высоту от пола</li>
+                    </ul>
+                </div>
+                <div class="step-image">
+                    <img src="{% static 'images/guide/step3.jpg' %}" alt="Основные размеры">
+                </div>
+            </div>
+        </div>
+        
+        <div class="guide-section">
+            <h2 data-i18n="Шаг 4. Вырезы и отверстия">Шаг 4. Вырезы и отверстия</h2>
+            <div class="step-content">
+                <div class="step-text">
+                    <p data-i18n="Отметьте расположение:">Отметьте расположение:</p>
+                    <ul>
+                        <li data-i18n="🔲 Мойки (с размерами)">🔲 Мойки (с размерами)</li>
+                        <li data-i18n="🔲 Варочной панели">🔲 Варочной панели</li>
+                        <li data-i18n="🔲 Смесителя">🔲 Смесителя</li>
+                        <li data-i18n="🔲 Розеток">🔲 Розеток</li>
+                    </ul>
+                </div>
+                <div class="step-image">
+                    <img src="{% static 'images/guide/step4.jpg' %}" alt="Вырезы">
+                </div>
+            </div>
+        </div>
+        
+        <div class="guide-section">
+            <h2 data-i18n="Шаг 5. Проверка уровня">Шаг 5. Проверка уровня</h2>
+            <div class="step-content">
+                <div class="step-text">
+                    <p data-i18n="Проверьте:">Проверьте:</p>
+                    <ul>
+                        <li data-i18n="⚖️ Горизонтальность пола">⚖️ Горизонтальность пола</li>
+                        <li data-i18n="⚖️ Ровность стен">⚖️ Ровность стен</li>
+                        <li data-i18n="⚖️ Углы (должны быть 90°)">⚖️ Углы (должны быть 90°)</li>
+                    </ul>
+                </div>
+                <div class="step-image">
+                    <img src="{% static 'images/guide/step5.jpg' %}" alt="Проверка уровня">
+                </div>
+            </div>
+        </div>
+        
+        <div class="guide-section">
+            <h2 data-i18n="Шаг 6. Фотофиксация">Шаг 6. Фотофиксация</h2>
+            <div class="step-content">
+                <div class="step-text">
+                    <p data-i18n="Сфотографируйте:">Сфотографируйте:</p>
+                    <ul>
+                        <li data-i18n="📸 Общий вид">📸 Общий вид</li>
+                        <li data-i18n="📸 Узлы соединений">📸 Узлы соединений</li>
+                        <li data-i18n="📸 Коммуникации">📸 Коммуникации</li>
+                        <li data-i18n="📸 Проблемные места">📸 Проблемные места</li>
+                    </ul>
+                </div>
+                <div class="step-image">
+                    <img src="{% static 'images/guide/step6.jpg' %}" alt="Фотофиксация">
+                </div>
+            </div>
+        </div>
+        
+        <div class="guide-tips">
+            <h3 data-i18n="💡 Важные советы">💡 Важные советы</h3>
+            <ul>
+                <li data-i18n="Измеряйте каждый размер 2-3 раза для точности">Измеряйте каждый размер 2-3 раза для точности</li>
+                <li data-i18n="Учитывайте зазоры (обычно 5-10 мм с каждой стороны)">Учитывайте зазоры (обычно 5-10 мм с каждой стороны)</li>
+                <li data-i18n="Не забывайте про плинтус и фартук">Не забывайте про плинтус и фартук</li>
+                <li data-i18n="Записывайте все размеры сразу, не полагайтесь на память">Записывайте все размеры сразу, не полагайтесь на память</li>
+                <li data-i18n="Если сомневаетесь - лучше вызовите специалиста">Если сомневаетесь - лучше вызовите специалиста</li>
+            </ul>
+        </div>
+        
+        <div class="guide-download">
+            <h3 data-i18n="📥 Скачать памятку">📥 Скачать памятку</h3>
+            <p data-i18n="Сохраните инструкцию, чтобы не забыть">Сохраните инструкцию, чтобы не забыть</p>
+            <a href="{% static 'files/measurement-guide.pdf' %}" class="btn-primary" download data-i18n="Скачать PDF">Скачать PDF</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.guide-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.guide-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.guide-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.guide-section {
+    background: white;
+    border-radius: 30px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow-light);
+}
+
+.guide-section h2 {
+    color: var(--primary);
+    margin-bottom: 20px;
+}
+
+.step-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    align-items: center;
+}
+
+.step-text ul {
+    padding-left: 20px;
+}
+
+.step-text li {
+    margin-bottom: 10px;
+    color: var(--gray);
+}
+
+.step-image img {
+    width: 100%;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+}
+
+.guide-tips {
+    background: rgba(212, 175, 55, 0.1);
+    border-radius: 20px;
+    padding: 30px;
+    margin: 40px 0;
+}
+
+.guide-tips h3 {
+    color: var(--primary);
+    margin-bottom: 20px;
+}
+
+.guide-tips ul {
+    padding-left: 20px;
+}
+
+.guide-tips li {
+    margin-bottom: 10px;
+    color: var(--gray);
+}
+
+.guide-download {
+    text-align: center;
+    padding: 40px;
+    background: var(--surface);
+    border-radius: 30px;
+}
+
+.guide-download h3 {
+    margin-bottom: 10px;
+}
+
+.guide-download p {
+    color: var(--gray);
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .step-content {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

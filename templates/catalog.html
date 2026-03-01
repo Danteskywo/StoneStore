@@ -1,0 +1,559 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Каталог камня - StoneStore{% endblock %}
+
+{% block content %}
+<div class="catalog-page">
+    <div class="catalog-header">
+        <h1 data-i18n="Каталог натурального камня">Каталог натурального камня</h1>
+        <p data-i18n="Выберите идеальный камень для вашего проекта">Выберите идеальный камень для вашего проекта</p>
+    </div>
+
+    <div class="catalog-content">
+        <aside class="filters-sidebar">
+            <h3 data-i18n="Фильтры">Фильтры</h3>
+            <form method="get" class="filter-form">
+                <div class="filter-group">
+                    <label data-i18n="Категория">Категория</label>
+                    <select name="category" class="filter-select">
+                        <option value="" data-i18n="Все категории">Все категории</option>
+                        {% for category in categories %}
+                        <option value="{{ category.slug }}" {% if current_category == category.slug %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label data-i18n="Цена за м²">Цена за м²</label>
+                    <div class="price-range">
+                        <input type="number" name="min_price" data-i18n-placeholder="от" placeholder="от" value="{{ min_price }}" class="price-input">
+                        <span>-</span>
+                        <input type="number" name="max_price" data-i18n-placeholder="до" placeholder="до" value="{{ max_price }}" class="price-input">
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label data-i18n="Твердость (мин)">Твердость (мин)</label>
+                    <select name="hardness" class="filter-select">
+                        <option value="" data-i18n="Любая">Любая</option>
+                        <option value="3" {% if hardness == '3' %}selected{% endif %} data-i18n="от 3 (Мягкий)">от 3 (Мягкий)</option>
+                        <option value="5" {% if hardness == '5' %}selected{% endif %} data-i18n="от 5 (Средний)">от 5 (Средний)</option>
+                        <option value="7" {% if hardness == '7' %}selected{% endif %} data-i18n="от 7 (Твердый)">от 7 (Твердый)</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label data-i18n="Поиск">Поиск</label>
+                    <input type="text" name="search" data-i18n-placeholder="Название камня..." placeholder="Название камня..." value="{{ search }}" class="filter-input">
+                </div>
+
+                <button type="submit" class="btn-filter" data-i18n="Применить">Применить</button>
+                <a href="{% url 'catalog' %}" class="btn-reset" data-i18n="Сбросить">Сбросить</a>
+            </form>
+        </aside>
+
+        <div class="products-grid">
+            <div class="sort-bar">
+                <span data-i18n="Сортировать:">Сортировать:</span>
+                <a href="?sort=-created_at{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}" class="{% if sort == '-created_at' %}active{% endif %}" data-i18n="Новинки">Новинки</a>
+                <a href="?sort=price_asc{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}" class="{% if sort == 'price_asc' %}active{% endif %}" data-i18n="Цена (возр.)">Цена (возр.)</a>
+                <a href="?sort=price_desc{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}" class="{% if sort == 'price_desc' %}active{% endif %}" data-i18n="Цена (убыв.)">Цена (убыв.)</a>
+                <a href="?sort=popular{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}" class="{% if sort == 'popular' %}active{% endif %}" data-i18n="Популярные">Популярные</a>
+            </div>
+
+            <div class="products">
+                {% for stone in page_obj %}
+                <div class="product-card">
+                    <a href="{% url 'stone_detail' stone.slug %}" class="product-link">
+                        <div class="product-image">
+                            {% if stone.main_image %}
+                            <img src="{{ stone.main_image.url }}" alt="{{ stone.name }}">
+                            {% else %}
+                            <div class="no-image">
+                                <span class="no-image-icon">💎</span>
+                                <span class="no-image-text" data-i18n="Нет фото">Нет фото</span>
+                            </div>
+                            {% endif %}
+                            {% if stone.is_new %}
+                            <span class="badge-new" data-i18n="Новинка">Новинка</span>
+                            {% endif %}
+                            {% if stone.is_popular %}
+                            <span class="badge-popular" data-i18n="Популярный">Популярный</span>
+                            {% endif %}
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">{{ stone.name }}</h3>
+                            <p class="product-category">{{ stone.category.name }}</p>
+                            <div class="product-price">
+                                <span class="price">{{ stone.price_per_sqm|floatformat:0 }} ₽/м²</span>
+                            </div>
+                            <div class="product-features">
+                                <span class="feature-item" data-i18n="⚒️ Твердость: {{ stone.hardness }}/10">⚒️ Твердость: {{ stone.hardness }}/10</span>
+                                {% if stone.frost_resistance %}
+                                <span class="feature-item" data-i18n="❄️ Морозостойкий">❄️ Морозостойкий</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                    <button class="compare-btn" onclick="addToCompare({{ stone.id }})">
+                        <span class="icon">⚖️</span>
+                        <span class="text" data-i18n="Сравнить">Сравнить</span>
+                    </button>
+                </div>
+                {% empty %}
+                <div class="empty-catalog">
+                    <div class="empty-icon">😕</div>
+                    <h3 data-i18n="Камни не найдены">Камни не найдены</h3>
+                    <p data-i18n="Попробуйте изменить параметры фильтрации">Попробуйте изменить параметры фильтрации</p>
+                    <a href="{% url 'catalog' %}" class="btn-primary" data-i18n="Сбросить фильтры">Сбросить фильтры</a>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if page_obj.has_other_pages %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                <a href="?page=1{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if hardness %}&hardness={{ hardness }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="page-link">«</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if hardness %}&hardness={{ hardness }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="page-link">‹</a>
+                {% endif %}
+                
+                <span class="page-current">{{ page_obj.number }}</span>
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if hardness %}&hardness={{ hardness }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="page-link">›</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if hardness %}&hardness={{ hardness }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="page-link">»</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.catalog-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.catalog-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.catalog-header h1 {
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 15px;
+}
+
+.catalog-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.catalog-content {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 30px;
+}
+
+.filters-sidebar {
+    background: var(--bg-primary);
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: var(--shadow);
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+}
+
+.filters-sidebar h3 {
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.filter-group {
+    margin-bottom: 20px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.filter-select,
+.filter-input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-family: 'Montserrat', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.filter-select:focus,
+.filter-input:focus {
+    border-color: var(--secondary);
+    outline: none;
+}
+
+.price-range {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.price-input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.btn-filter {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 10px;
+}
+
+.btn-filter:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.btn-reset {
+    display: block;
+    text-align: center;
+    padding: 12px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    text-decoration: none;
+    border-radius: 10px;
+    border: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.btn-reset:hover {
+    border-color: var(--secondary);
+}
+
+.products-grid {
+    width: 100%;
+}
+
+.sort-bar {
+    background: var(--bg-primary);
+    border-radius: 15px;
+    padding: 15px 20px;
+    margin-bottom: 25px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+    box-shadow: var(--shadow);
+}
+
+.sort-bar span {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.sort-bar a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.sort-bar a:hover {
+    color: var(--secondary);
+}
+
+.sort-bar a.active {
+    color: var(--primary);
+    font-weight: 600;
+    background: var(--bg-secondary);
+}
+
+.products {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.product-card {
+    background: var(--bg-primary);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    position: relative;
+    border: 1px solid var(--border-color);
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--secondary);
+}
+
+.product-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.product-image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    background: var(--bg-secondary);
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-image img {
+    transform: scale(1.1);
+}
+
+.no-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary-light) 100%);
+}
+
+.no-image-icon {
+    font-size: 4rem;
+    margin-bottom: 10px;
+}
+
+.no-image-text {
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.badge-new,
+.badge-popular {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    z-index: 2;
+}
+
+.badge-new {
+    background: var(--success);
+    color: white;
+}
+
+.badge-popular {
+    background: var(--secondary);
+    color: white;
+}
+
+.product-info {
+    padding: 20px;
+}
+
+.product-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: var(--text-primary);
+}
+
+.product-category {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.product-price {
+    margin-bottom: 10px;
+}
+
+.price {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.product-features {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.feature-item {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    padding: 4px 10px;
+    border-radius: 15px;
+}
+
+.compare-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 8px 15px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid var(--primary);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    z-index: 10;
+    backdrop-filter: blur(5px);
+}
+
+.compare-btn:hover {
+    background: var(--primary);
+    color: white;
+    transform: scale(1.05);
+}
+
+.empty-catalog {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 20px;
+    background: var(--bg-primary);
+    border-radius: 30px;
+    box-shadow: var(--shadow);
+}
+
+.empty-icon {
+    font-size: 5rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-catalog h3 {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.empty-catalog p {
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+}
+
+.pagination {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 40px;
+}
+
+.page-link {
+    padding: 10px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    background: var(--bg-primary);
+}
+
+.page-link:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.page-current {
+    padding: 10px 16px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+@media (max-width: 992px) {
+    .catalog-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .filters-sidebar {
+        position: static;
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .products {
+        grid-template-columns: 1fr;
+    }
+    
+    .sort-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+</style>
+
+<script>
+function addToCompare(stoneId) {
+    fetch(`/compare/add/${stoneId}/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}'}
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            if (data.action === 'added') {
+                alert(translate('Добавлено в сравнение') + ' (' + data.count + '/4)');
+            } else {
+                alert(translate('Удалено из сравнения'));
+            }
+        } else {
+            alert(translate('Ошибка:') + ' ' + data.error);
+        }
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Заказ принят - StoneStore{% endblock %}
+
+{% block content %}
+<div class="success-page">
+    <div class="success-container">
+        <div class="success-icon">✓</div>
+        <h1 data-i18n="Спасибо за заказ!">Спасибо за заказ!</h1>
+        <p class="success-message"><span data-i18n="Ваш заказ №">Ваш заказ №</span>{{ order.id }} <span data-i18n="успешно принят">успешно принят</span></p>
+        
+        <div class="order-details">
+            <h2 data-i18n="Детали заказа">Детали заказа</h2>
+            <table class="details-table">
+                <tr>
+                    <td data-i18n="Имя:">Имя:</td>
+                    <td>{{ order.customer_name }}</td>
+                </tr>
+                <tr>
+                    <td data-i18n="Телефон:">Телефон:</td>
+                    <td>{{ order.customer_phone }}</td>
+                </tr>
+                {% if order.customer_email %}
+                <tr>
+                    <td data-i18n="Email:">Email:</td>
+                    <td>{{ order.customer_email }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td data-i18n="Камень:">Камень:</td>
+                    <td>{{ order.stone.name }}</td>
+                </tr>
+                <tr>
+                    <td data-i18n="Размеры:">Размеры:</td>
+                    <td>{{ order.length }} x {{ order.width }} м</td>
+                </tr>
+                <tr>
+                    <td data-i18n="Площадь:">Площадь:</td>
+                    <td>{{ area }} м²</td>
+                </tr>
+                <tr>
+                    <td data-i18n="Примерная стоимость:">Примерная стоимость:</td>
+                    <td class="price">{{ price|floatformat:0 }} ₽</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="next-steps">
+            <h2 data-i18n="Что дальше?">Что дальше?</h2>
+            <ol>
+                <li data-i18n="Наш менеджер свяжется с вами в ближайшее время">Наш менеджер свяжется с вами в ближайшее время</li>
+                <li data-i18n="Мы уточним детали и договоримся о замере">Мы уточним детали и договоримся о замере</li>
+                <li data-i18n="После замера подготовим точный расчет">После замера подготовим точный расчет</li>
+                <li data-i18n="Приступим к производству после согласования">Приступим к производству после согласования</li>
+            </ol>
+        </div>
+
+        <div class="success-actions">
+            <a href="{% url 'catalog' %}" class="btn-primary" data-i18n="В каталог">В каталог</a>
+            <a href="{% url 'home' %}" class="btn-secondary" data-i18n="На главную">На главную</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.success-page {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.success-container {
+    max-width: 600px;
+    text-align: center;
+    background: var(--bg-primary);
+    border-radius: var(--radius);
+    padding: 50px;
+    box-shadow: var(--shadow);
+}
+
+.success-icon {
+    width: 100px;
+    height: 100px;
+    background: var(--success);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    margin: 0 auto 30px;
+}
+
+.success-container h1 {
+    font-size: 2rem;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.success-message {
+    font-size: 1.2rem;
+    color: var(--gray);
+    margin-bottom: 30px;
+}
+
+.order-details {
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 25px;
+    margin: 30px 0;
+    text-align: left;
+}
+
+.order-details h2 {
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+    color: var(--text-primary);
+}
+
+.details-table {
+    width: 100%;
+}
+
+.details-table td {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+}
+
+.details-table td:first-child {
+    font-weight: 600;
+    width: 40%;
+    color: var(--text-primary);
+}
+
+.next-steps {
+    text-align: left;
+    margin: 30px 0;
+}
+
+.next-steps h2 {
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+    color: var(--text-primary);
+}
+
+.next-steps ol {
+    padding-left: 20px;
+    color: var(--gray);
+}
+
+.next-steps li {
+    margin-bottom: 10px;
+}
+
+.success-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .success-actions {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}

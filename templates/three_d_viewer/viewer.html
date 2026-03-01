@@ -1,0 +1,395 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}3D Визуализация столешницы - StoneStore{% endblock %}
+
+{% block extra_css %}
+<style>
+    #canvas-container {
+        width: 100%;
+        height: 600px;
+        position: relative;
+        background: #111;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+    
+    .controls-panel {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-top: 30px;
+        box-shadow: var(--shadow);
+    }
+    
+    .control-group {
+        margin-bottom: 25px;
+    }
+    
+    .control-group h3 {
+        margin-bottom: 15px;
+        color: var(--dark);
+    }
+    
+    .slider-container {
+        margin-bottom: 15px;
+    }
+    
+    .slider-container label {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--gray);
+    }
+    
+    .slider-container input {
+        width: 100%;
+    }
+    
+    .material-preview {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .material-thumb {
+        cursor: pointer;
+        border: 2px solid transparent;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .material-thumb:hover {
+        transform: scale(1.05);
+    }
+    
+    .material-thumb.selected {
+        border-color: var(--secondary);
+    }
+    
+    .material-thumb img {
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: cover;
+    }
+    
+    .material-thumb span {
+        display: block;
+        padding: 5px;
+        text-align: center;
+        font-size: 0.8rem;
+        background: var(--surface);
+    }
+    
+    .view-controls {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    
+    .view-btn {
+        flex: 1;
+        padding: 10px;
+        background: var(--surface);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .view-btn:hover {
+        background: var(--primary);
+        color: white;
+    }
+    
+    .view-btn.active {
+        background: var(--primary);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center mb-4" data-i18n="🎮 3D Визуализация столешницы">🎮 3D Визуализация столешницы</h1>
+    
+    <div id="canvas-container"></div>
+    
+    <div class="controls-panel">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="control-group">
+                    <h3 data-i18n="Размеры">Размеры</h3>
+                    <div class="slider-container">
+                        <label data-i18n="Длина:">Длина: <span id="length-value">2.0</span> м</label>
+                        <input type="range" id="length-slider" min="1.0" max="4.0" step="0.1" value="2.0">
+                    </div>
+                    <div class="slider-container">
+                        <label data-i18n="Ширина:">Ширина: <span id="width-value">0.6</span> м</label>
+                        <input type="range" id="width-slider" min="0.5" max="1.5" step="0.1" value="0.6">
+                    </div>
+                    <div class="slider-container">
+                        <label data-i18n="Толщина:">Толщина: <span id="thickness-value">30</span> мм</label>
+                        <input type="range" id="thickness-slider" min="20" max="50" step="5" value="30">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="control-group">
+                    <h3 data-i18n="Материал">Материал</h3>
+                    <select id="stone-select" class="form-control">
+                        {% for stone in stones %}
+                        <option value="{{ stone.id }}" {% if stone.id == current_stone.id %}selected{% endif %}>
+                            {{ stone.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    
+                    <div class="material-preview" id="material-preview">
+                        {% for stone in stones|slice:":8" %}
+                        <div class="material-thumb {% if stone.id == current_stone.id %}selected{% endif %}" 
+                             data-id="{{ stone.id }}">
+                            <img src="{{ stone.main_image.url }}" alt="{{ stone.name }}">
+                            <span>{{ stone.name }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="control-group">
+                    <h3 data-i18n="Вид">Вид</h3>
+                    <div class="view-controls">
+                        <button class="view-btn active" data-view="perspective" data-i18n="Перспектива">Перспектива</button>
+                        <button class="view-btn" data-view="top" data-i18n="Сверху">Сверху</button>
+                        <button class="view-btn" data-view="side" data-i18n="Сбоку">Сбоку</button>
+                        <button class="view-btn" data-view="front" data-i18n="Спереди">Спереди</button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3 data-i18n="Действия">Действия</h3>
+                    <button class="btn-submit" id="save-view" data-i18n="Сохранить вид">Сохранить вид</button>
+                    <button class="btn-secondary" id="reset-view" data-i18n="Сбросить">Сбросить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+class Stone3DViewer {
+    constructor() {
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0x111122);
+        
+        this.camera = new THREE.PerspectiveCamera(45, 800/600, 0.1, 1000);
+        this.camera.position.set(5, 5, 5);
+        this.camera.lookAt(0, 0, 0);
+        
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(800, 600);
+        this.renderer.shadowMap.enabled = true;
+        document.getElementById('canvas-container').appendChild(this.renderer.domElement);
+        
+        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.05;
+        
+        this.addLights();
+        this.addFloor();
+        
+        this.currentMaterial = null;
+        this.countertop = null;
+        
+        this.loadStoneTexture({{ current_stone.id }});
+        this.createCountertop(2.0, 0.6, 0.03);
+        
+        this.animate();
+        this.bindEvents();
+    }
+    
+    addLights() {
+        const ambientLight = new THREE.AmbientLight(0x404060);
+        this.scene.add(ambientLight);
+        
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+        dirLight.position.set(5, 10, 7);
+        dirLight.castShadow = true;
+        this.scene.add(dirLight);
+        
+        const backLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        backLight.position.set(-5, 5, -5);
+        this.scene.add(backLight);
+    }
+    
+    addFloor() {
+        const geometry = new THREE.PlaneGeometry(10, 10);
+        const material = new THREE.MeshStandardMaterial({ color: 0x333344, side: THREE.DoubleSide });
+        const floor = new THREE.Mesh(geometry, material);
+        floor.rotation.x = Math.PI / 2;
+        floor.position.y = -0.15;
+        floor.receiveShadow = true;
+        this.scene.add(floor);
+        
+        const gridHelper = new THREE.GridHelper(10, 20, 0x888888, 0x444444);
+        gridHelper.position.y = -0.14;
+        this.scene.add(gridHelper);
+    }
+    
+    loadStoneTexture(stoneId) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+        
+        ctx.fillStyle = '#888888';
+        ctx.fillRect(0, 0, 512, 512);
+        
+        for (let i = 0; i < 500; i++) {
+            const x = Math.random() * 512;
+            const y = Math.random() * 512;
+            const r = Math.random() * 20 + 5;
+            
+            const gray = Math.random() * 100 + 100;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgb(${gray}, ${gray}, ${gray})`;
+            ctx.fill();
+        }
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(1, 1);
+        
+        this.currentMaterial = new THREE.MeshStandardMaterial({
+            map: texture,
+            roughness: 0.3,
+            metalness: 0.1,
+            emissive: new THREE.Color(0x000000)
+        });
+        
+        if (this.countertop) {
+            this.countertop.material = this.currentMaterial;
+        }
+    }
+    
+    createCountertop(length, width, thickness) {
+        if (this.countertop) {
+            this.scene.remove(this.countertop);
+        }
+        
+        const geometry = new THREE.BoxGeometry(length, thickness, width);
+        this.countertop = new THREE.Mesh(geometry, this.currentMaterial || new THREE.MeshStandardMaterial({ color: 0x888888 }));
+        this.countertop.castShadow = true;
+        this.countertop.receiveShadow = true;
+        this.countertop.position.y = thickness / 2;
+        
+        this.scene.add(this.countertop);
+    }
+    
+    updateDimensions(length, width, thickness) {
+        this.createCountertop(length, width, thickness / 100);
+    }
+    
+    setView(view) {
+        switch(view) {
+            case 'perspective':
+                this.camera.position.set(5, 5, 5);
+                break;
+            case 'top':
+                this.camera.position.set(0, 10, 0);
+                break;
+            case 'side':
+                this.camera.position.set(10, 2, 0);
+                break;
+            case 'front':
+                this.camera.position.set(0, 2, 10);
+                break;
+        }
+        this.camera.lookAt(0, 0, 0);
+        this.controls.target.set(0, 0, 0);
+    }
+    
+    animate() {
+        requestAnimationFrame(() => this.animate());
+        this.controls.update();
+        this.renderer.render(this.scene, this.camera);
+    }
+    
+    bindEvents() {
+        document.getElementById('length-slider').addEventListener('input', (e) => {
+            document.getElementById('length-value').textContent = e.target.value;
+            this.updateDimensions(
+                parseFloat(e.target.value),
+                parseFloat(document.getElementById('width-slider').value),
+                parseFloat(document.getElementById('thickness-slider').value)
+            );
+        });
+        
+        document.getElementById('width-slider').addEventListener('input', (e) => {
+            document.getElementById('width-value').textContent = e.target.value;
+            this.updateDimensions(
+                parseFloat(document.getElementById('length-slider').value),
+                parseFloat(e.target.value),
+                parseFloat(document.getElementById('thickness-slider').value)
+            );
+        });
+        
+        document.getElementById('thickness-slider').addEventListener('input', (e) => {
+            document.getElementById('thickness-value').textContent = e.target.value;
+            this.updateDimensions(
+                parseFloat(document.getElementById('length-slider').value),
+                parseFloat(document.getElementById('width-slider').value),
+                parseFloat(e.target.value)
+            );
+        });
+        
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.setView(btn.dataset.view);
+            });
+        });
+        
+        document.querySelectorAll('.material-thumb').forEach(thumb => {
+            thumb.addEventListener('click', (e) => {
+                document.querySelectorAll('.material-thumb').forEach(t => t.classList.remove('selected'));
+                thumb.classList.add('selected');
+                this.loadStoneTexture(thumb.dataset.id);
+            });
+        });
+        
+        document.getElementById('stone-select').addEventListener('change', (e) => {
+            this.loadStoneTexture(e.target.value);
+        });
+        
+        document.getElementById('save-view').addEventListener('click', () => {
+            localStorage.setItem('lastView', JSON.stringify({
+                position: this.camera.position,
+                target: this.controls.target
+            }));
+        });
+        
+        document.getElementById('reset-view').addEventListener('click', () => {
+            this.setView('perspective');
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    window.viewer = new Stone3DViewer();
+});
+</script>
+{% endblock %}

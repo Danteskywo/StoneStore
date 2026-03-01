@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Личный кабинет - StoneStore{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-header">
+        <div class="profile-avatar">
+            {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" alt="{{ user.username }}">
+            {% else %}
+            <div class="avatar-placeholder">
+                {{ user.username|first|upper }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="profile-info">
+            <h1>{{ user.username }}</h1>
+            <p class="profile-email">{{ user.email }}</p>
+            {% if user.phone %}
+            <p class="profile-phone">{{ user.phone }}</p>
+            {% endif %}
+        </div>
+        <div class="profile-actions">
+            <a href="{% url 'profile_edit' %}" class="btn-edit" data-i18n="✎ Редактировать">✎ Редактировать</a>
+        </div>
+    </div>
+    
+    <div class="profile-stats">
+        <div class="stat-card">
+            <div class="stat-value">{{ orders.count }}</div>
+            <div class="stat-label" data-i18n="Заказов">Заказов</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ calculations.count }}</div>
+            <div class="stat-label" data-i18n="Расчетов">Расчетов</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ wishlist.count }}</div>
+            <div class="stat-label" data-i18n="В избранном">В избранном</div>
+        </div>
+    </div>
+    
+    <div class="profile-sections">
+        <div class="profile-section">
+            <div class="section-header">
+                <h2 data-i18n="📦 Последние заказы">📦 Последние заказы</h2>
+                <a href="{% url 'profile_orders' %}" class="section-link" data-i18n="Все заказы">Все заказы</a> →
+            </div>
+            
+            {% if orders %}
+            <div class="orders-list">
+                {% for order in orders|slice:":3" %}
+                <div class="order-item">
+                    <div class="order-info">
+                        <span class="order-id" data-i18n="Заказ #{{ order.id }}">Заказ #{{ order.id }}</span>
+                        <span class="order-date">{{ order.created_at|date:"d.m.Y" }}</span>
+                        <span class="order-status status-{{ order.status }}">{{ order.get_status_display }}</span>
+                    </div>
+                    <div class="order-stone">{{ order.stone.name }}</div>
+                    <div class="order-price">{{ order.calculate_price|floatformat:0 }} ₽</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="section-empty" data-i18n="У вас пока нет заказов">У вас пока нет заказов</p>
+            {% endif %}
+        </div>
+        
+        <div class="profile-section">
+            <div class="section-header">
+                <h2 data-i18n="📐 Сохраненные расчеты">📐 Сохраненные расчеты</h2>
+                <a href="{% url 'profile_calculations' %}" class="section-link" data-i18n="Все расчеты">Все расчеты</a> →
+            </div>
+            
+            {% if calculations %}
+            <div class="calculations-list">
+                {% for calc in calculations|slice:":3" %}
+                <div class="calculation-item">
+                    <div class="calc-info">
+                        <span class="calc-name">{{ calc.name }}</span>
+                        <span class="calc-date">{{ calc.created_at|date:"d.m.Y" }}</span>
+                    </div>
+                    <div class="calc-details">
+                        <span>{{ calc.length }} x {{ calc.width }} м</span>
+                        <span class="calc-price">{{ calc.total_price|floatformat:0 }} ₽</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="section-empty" data-i18n="У вас пока нет сохраненных расчетов">У вас пока нет сохраненных расчетов</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.profile-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow-light);
+}
+
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-1);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-info h1 {
+    font-size: 2rem;
+    margin-bottom: 5px;
+}
+
+.profile-email,
+.profile-phone {
+    color: var(--gray);
+    font-size: 1rem;
+}
+
+.btn-edit {
+    padding: 10px 25px;
+    background: var(--surface);
+    color: var(--dark);
+    text-decoration: none;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+}
+
+.btn-edit:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: var(--shadow-light);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.stat-label {
+    color: var(--gray);
+    margin-top: 5px;
+}
+
+.profile-sections {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.profile-section {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: var(--shadow-light);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-header h2 {
+    font-size: 1.3rem;
+}
+
+.section-link {
+    color: var(--secondary);
+    text-decoration: none;
+}
+
+.orders-list,
+.calculations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.order-item,
+.calculation-item {
+    padding: 15px;
+    background: var(--surface);
+    border-radius: 10px;
+}
+
+.order-info {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 8px;
+}
+
+.order-id {
+    font-weight: 600;
+}
+
+.order-date {
+    color: var(--gray);
+}
+
+.order-status {
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-new { background: var(--info); color: white; }
+.status-processing { background: var(--warning); color: var(--dark); }
+.status-completed { background: var(--success); color: white; }
+
+.order-stone {
+    color: var(--dark);
+    margin-bottom: 5px;
+}
+
+.order-price {
+    font-weight: 700;
+    color: var(--primary);
+    text-align: right;
+}
+
+.calculation-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.calc-name {
+    font-weight: 600;
+}
+
+.calc-date {
+    color: var(--gray);
+    font-size: 0.9rem;
+    margin-left: 10px;
+}
+
+.calc-details {
+    text-align: right;
+}
+
+.calc-price {
+    display: block;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.section-empty {
+    color: var(--gray);
+    text-align: center;
+    padding: 20px;
+}
+
+@media (max-width: 768px) {
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .profile-sections {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

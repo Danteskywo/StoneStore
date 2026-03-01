@@ -1,0 +1,236 @@
+<div class="payment-stub" id="paymentStub" style="display: none;">
+    <div class="payment-overlay"></div>
+    <div class="payment-modal">
+        <div class="payment-header">
+            <h3 data-i18n="💳 Оплата заказа">💳 Оплата заказа</h3>
+            <button class="payment-close" onclick="closePaymentModal()">✕</button>
+        </div>
+        
+        <div class="payment-body">
+            <div class="payment-icon">⏳</div>
+            <h4 data-i18n="Оплата на сайте временно недоступна">Оплата на сайте временно недоступна</h4>
+            <p data-i18n="Мы работаем над подключением онлайн-оплаты. Сейчас вы можете:">Мы работаем над подключением онлайн-оплаты. Сейчас вы можете:</p>
+            
+            <div class="payment-options">
+                <div class="payment-option">
+                    <span class="option-icon">📞</span>
+                    <div class="option-text">
+                        <strong data-i18n="Оплата при получении">Оплата при получении</strong>
+                        <p data-i18n="Оплатите заказ наличными или картой при доставке">Оплатите заказ наличными или картой при доставке</p>
+                    </div>
+                </div>
+                
+                <div class="payment-option">
+                    <span class="option-icon">🏦</span>
+                    <div class="option-text">
+                        <strong data-i18n="Банковский перевод">Банковский перевод</strong>
+                        <p data-i18n="Мы выставим счет для оплаты на расчетный счет">Мы выставим счет для оплаты на расчетный счет</p>
+                    </div>
+                </div>
+                
+                <div class="payment-option">
+                    <span class="option-icon">💼</span>
+                    <div class="option-text">
+                        <strong data-i18n="Для юридических лиц">Для юридических лиц</strong>
+                        <p data-i18n="Работаем с НДС, предоставляем все документы">Работаем с НДС, предоставляем все документы</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="payment-contact">
+                <p data-i18n="Наш менеджер свяжется с вами для уточнения деталей оплаты">Наш менеджер свяжется с вами для уточнения деталей оплаты</p>
+            </div>
+            
+            <div class="payment-actions">
+                <button class="btn-primary" onclick="closePaymentModal()" data-i18n="Понятно">Понятно</button>
+                <a href="{% url 'contact' %}" class="btn-secondary" data-i18n="Связаться с нами">Связаться с нами</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.payment-stub {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.payment-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease;
+}
+
+.payment-modal {
+    position: relative;
+    width: 90%;
+    max-width: 500px;
+    background: white;
+    border-radius: 30px;
+    box-shadow: var(--shadow-hover);
+    animation: slideUp 0.3s ease;
+    overflow: hidden;
+}
+
+.payment-header {
+    background: var(--gradient-1);
+    color: white;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.payment-header h3 {
+    font-size: 1.3rem;
+}
+
+.payment-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.payment-body {
+    padding: 30px;
+    text-align: center;
+}
+
+.payment-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    animation: pulse 2s infinite;
+}
+
+.payment-body h4 {
+    font-size: 1.5rem;
+    color: var(--dark);
+    margin-bottom: 15px;
+}
+
+.payment-body p {
+    color: var(--gray);
+    margin-bottom: 25px;
+}
+
+.payment-options {
+    margin: 30px 0;
+    text-align: left;
+}
+
+.payment-option {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    background: var(--surface);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.payment-option:hover {
+    transform: translateX(5px);
+    background: #e0e6e8;
+}
+
+.option-icon {
+    font-size: 1.5rem;
+}
+
+.option-text strong {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--dark);
+}
+
+.option-text p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--gray);
+}
+
+.payment-contact {
+    background: rgba(212, 175, 55, 0.1);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.payment-contact p {
+    margin: 0;
+    color: var(--primary);
+}
+
+.payment-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@media (max-width: 768px) {
+    .payment-modal {
+        width: 95%;
+    }
+    
+    .payment-actions {
+        flex-direction: column;
+    }
+}
+</style>
+
+<script>
+function showPaymentModal() {
+    document.getElementById('paymentStub').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closePaymentModal() {
+    document.getElementById('paymentStub').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentButtons = document.querySelectorAll('.btn-pay');
+    paymentButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            showPaymentModal();
+        });
+    });
+});
+</script>

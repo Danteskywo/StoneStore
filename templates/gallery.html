@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Галерея работ - StoneStore{% endblock %}
+
+{% block content %}
+<div class="gallery-page">
+    <div class="gallery-header">
+        <h1 data-i18n="Галерея работ">Галерея работ</h1>
+        <p data-i18n="Наши выполненные проекты из натурального камня">Наши выполненные проекты из натурального камня</p>
+    </div>
+
+    <div class="gallery-filters">
+        <form method="get" class="gallery-filter-form">
+            <select name="category" class="filter-select" onchange="this.form.submit()">
+                <option value="" data-i18n="Все категории">Все категории</option>
+                {% for category in categories %}
+                <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"i" %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    <div class="gallery-grid">
+        {% for stone in stones %}
+            {% if stone.main_image %}
+            <div class="gallery-item">
+                <a href="{% url 'stone_detail' stone.slug %}" class="gallery-link">
+                    <div class="gallery-image">
+                        <img src="{{ stone.main_image.url }}" alt="{{ stone.name }}">
+                        <div class="gallery-overlay">
+                            <h3>{{ stone.name }}</h3>
+                            <p>{{ stone.category.name }}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+            
+            {% for image in stone.images.all|slice:":2" %}
+            <div class="gallery-item">
+                <a href="{% url 'stone_detail' stone.slug %}" class="gallery-link">
+                    <div class="gallery-image">
+                        <img src="{{ image.image.url }}" alt="{{ stone.name }}">
+                        <div class="gallery-overlay">
+                            <h3>{{ stone.name }}</h3>
+                            <p>{{ stone.category.name }}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        {% empty %}
+        <div class="gallery-empty">
+            <p data-i18n="Фотографии не найдены">Фотографии не найдены</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.gallery-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.gallery-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.gallery-header h1 {
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 15px;
+}
+
+.gallery-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.gallery-filters {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.gallery-filter-form {
+    display: inline-block;
+}
+
+.gallery-filter-form select {
+    padding: 12px 25px;
+    border: 2px solid var(--surface);
+    border-radius: var(--radius-lg);
+    font-size: 1rem;
+    font-family: 'Montserrat', sans-serif;
+    cursor: pointer;
+    min-width: 250px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.gallery-item {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    aspect-ratio: 1;
+}
+
+.gallery-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+}
+
+.gallery-image {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.gallery-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.gallery-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    color: white;
+    padding: 20px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.gallery-item:hover .gallery-overlay {
+    transform: translateY(0);
+}
+
+.gallery-item:hover img {
+    transform: scale(1.1);
+}
+
+.gallery-overlay h3 {
+    margin-bottom: 5px;
+    font-size: 1.1rem;
+}
+
+.gallery-overlay p {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.gallery-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    color: var(--gray);
+}
+
+@media (max-width: 768px) {
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+}
+</style>
+{% endblock %}

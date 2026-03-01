@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Заказать столешницу - StoneStore{% endblock %}
+
+{% block content %}
+<div class="order-page">
+    <div class="order-header">
+        <h1 data-i18n="Заказать столешницу">Заказать столешницу</h1>
+        <p data-i18n="Заполните форму и мы свяжемся с вами для уточнения деталей">Заполните форму и мы свяжемся с вами для уточнения деталей</p>
+    </div>
+
+    <div class="order-content">
+        <div class="order-form-container">
+            <form method="post" class="order-form">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="form-errors">
+                    {% for error in form.non_field_errors %}
+                        <p class="error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="{{ form.customer_name.id_for_label }}" data-i18n="{{ form.customer_name.label }}">{{ form.customer_name.label }}</label>
+                    {{ form.customer_name }}
+                    {% if form.customer_name.errors %}
+                    <p class="error">{{ form.customer_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.customer_phone.id_for_label }}" data-i18n="{{ form.customer_phone.label }}">{{ form.customer_phone.label }}</label>
+                        {{ form.customer_phone }}
+                        {% if form.customer_phone.errors %}
+                        <p class="error">{{ form.customer_phone.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.customer_email.id_for_label }}" data-i18n="{{ form.customer_email.label }}">{{ form.customer_email.label }}</label>
+                        {{ form.customer_email }}
+                        {% if form.customer_email.errors %}
+                        <p class="error">{{ form.customer_email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.customer_address.id_for_label }}" data-i18n="{{ form.customer_address.label }}">{{ form.customer_address.label }}</label>
+                    {{ form.customer_address }}
+                    {% if form.customer_address.errors %}
+                    <p class="error">{{ form.customer_address.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.stone.id_for_label }}" data-i18n="{{ form.stone.label }}">{{ form.stone.label }}</label>
+                    {{ form.stone }}
+                    {% if form.stone.errors %}
+                    <p class="error">{{ form.stone.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.length.id_for_label }}" data-i18n="{{ form.length.label }}">{{ form.length.label }}</label>
+                        {{ form.length }}
+                        {% if form.length.errors %}
+                        <p class="error">{{ form.length.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.width.id_for_label }}" data-i18n="{{ form.width.label }}">{{ form.width.label }}</label>
+                        {{ form.width }}
+                        {% if form.width.errors %}
+                        <p class="error">{{ form.width.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.thickness.id_for_label }}" data-i18n="{{ form.thickness.label }}">{{ form.thickness.label }}</label>
+                    {{ form.thickness }}
+                    {% if form.thickness.errors %}
+                    <p class="error">{{ form.thickness.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.edge_type.id_for_label }}" data-i18n="{{ form.edge_type.label }}">{{ form.edge_type.label }}</label>
+                    {{ form.edge_type }}
+                    {% if form.edge_type.errors %}
+                    <p class="error">{{ form.edge_type.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.sink_type.id_for_label }}" data-i18n="{{ form.sink_type.label }}">{{ form.sink_type.label }}</label>
+                    {{ form.sink_type }}
+                    {% if form.sink_type.errors %}
+                    <p class="error">{{ form.sink_type.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.cutouts.id_for_label }}" data-i18n="{{ form.cutouts.label }}">{{ form.cutouts.label }}</label>
+                    {{ form.cutouts }}
+                    {% if form.cutouts.errors %}
+                    <p class="error">{{ form.cutouts.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.comment.id_for_label }}" data-i18n="{{ form.comment.label }}">{{ form.comment.label }}</label>
+                    {{ form.comment }}
+                    {% if form.comment.errors %}
+                    <p class="error">{{ form.comment.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="promo-block">
+                    <h3 data-i18n="🎟️ Промокод">🎟️ Промокод</h3>
+                    <div class="promo-form" id="promoForm">
+                        <input type="text" id="promoCode" data-i18n-placeholder="Введите промокод" placeholder="Введите промокод" class="form-control">
+                        <button type="button" class="btn-promo" onclick="applyPromo()" data-i18n="Применить">Применить</button>
+                    </div>
+                    <div class="promo-applied" id="promoApplied" style="display: none;">
+                        <span class="applied-code"><span data-i18n="✓ Промокод">✓ Промокод</span> <span id="appliedCode"></span> <span data-i18n="применен">применен</span></span>
+                        <button class="remove-promo" onclick="removePromo()">✕</button>
+                    </div>
+                    <div class="promo-message" id="promoMessage"></div>
+                </div>
+
+                <div class="price-summary">
+                    <div class="summary-row">
+                        <span data-i18n="Стоимость:">Стоимость:</span>
+                        <span id="originalPrice">0 <span data-i18n="₽">₽</span></span>
+                    </div>
+                    <div class="summary-row discount-row" id="discountRow" style="display: none;">
+                        <span data-i18n="Скидка:">Скидка:</span>
+                        <span id="discountAmount">-0 <span data-i18n="₽">₽</span></span>
+                    </div>
+                    <div class="summary-row total">
+                        <span data-i18n="Итого:">Итого:</span>
+                        <span id="finalPrice">0 <span data-i18n="₽">₽</span></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit" data-i18n="Отправить заказ">Отправить заказ</button>
+            </form>
+        </div>
+
+        <div class="order-info">
+            <div class="info-card">
+                <h3 data-i18n="Почему стоит заказать у нас?">Почему стоит заказать у нас?</h3>
+                <ul>
+                    <li data-i18n="✓ Натуральный камень высшего качества">✓ Натуральный камень высшего качества</li>
+                    <li data-i18n="✓ Современное оборудование с ЧПУ">✓ Современное оборудование с ЧПУ</li>
+                    <li data-i18n="✓ Опытные мастера">✓ Опытные мастера</li>
+                    <li data-i18n="✓ Бесплатный замер">✓ Бесплатный замер</li>
+                    <li data-i18n="✓ Доставка и монтаж">✓ Доставка и монтаж</li>
+                    <li data-i18n="✓ Гарантия 5 лет">✓ Гарантия 5 лет</li>
+                </ul>
+            </div>
+            <div class="info-card">
+                <h3 data-i18n="Этапы работы">Этапы работы</h3>
+                <ol>
+                    <li data-i18n="Заявка на сайте">Заявка на сайте</li>
+                    <li data-i18n="Выезд замерщика">Выезд замерщика</li>
+                    <li data-i18n="Расчет стоимости">Расчет стоимости</li>
+                    <li data-i18n="Производство">Производство</li>
+                    <li data-i18n="Доставка и монтаж">Доставка и монтаж</li>
+                </ol>
+            </div>
+            <div class="info-card">
+                <h3 data-i18n="Контакты">Контакты</h3>
+                <p><span data-i18n="📞">📞</span> <span data-i18n="+7 (928) 720-78-77">+7 (928) 720-78-77</span></p>
+                <p><span data-i18n="✉️">✉️</span> <span data-i18n="skywo@mail.ru">skywo@mail.ru</span></p>
+                <p><span data-i18n="📍">📍</span> <span data-i18n="Нальчик, ул. Каменная, 15">Нальчик, ул. Каменная, 15</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.promo-block {
+    background: var(--surface);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.promo-form {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-promo {
+    padding: 0 20px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-promo:hover {
+    background: var(--primary-light);
+}
+
+.promo-applied {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(39, 174, 96, 0.1);
+    color: var(--success);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.remove-promo {
+    background: none;
+    border: none;
+    color: var(--danger);
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.promo-message {
+    margin-top: 10px;
+    font-size: 0.9rem;
+}
+
+.promo-message.success {
+    color: var(--success);
+}
+
+.promo-message.error {
+    color: var(--danger);
+}
+
+.price-summary {
+    margin-top: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: var(--shadow-light);
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.summary-row.total {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: none;
+    margin-top: 10px;
+}
+
+.discount-row {
+    color: var(--success);
+}
+</style>
+
+<script>
+let originalPrice = 0;
+
+function calculatePrice() {
+    const stoneSelect = document.querySelector('#id_stone');
+    const length = parseFloat(document.querySelector('#id_length').value) || 0;
+    const width = parseFloat(document.querySelector('#id_width').value) || 0;
+    
+    if (stoneSelect && stoneSelect.selectedIndex > 0) {
+        const option = stoneSelect.options[stoneSelect.selectedIndex];
+        const pricePerSqm = parseFloat(option.dataset.price || 0);
+        originalPrice = length * width * pricePerSqm;
+        document.getElementById('originalPrice').innerHTML = originalPrice.toLocaleString() + ' <span data-i18n="₽">₽</span>';
+        document.getElementById('finalPrice').innerHTML = originalPrice.toLocaleString() + ' <span data-i18n="₽">₽</span>';
+    }
+}
+
+document.querySelector('#id_stone')?.addEventListener('change', calculatePrice);
+document.querySelector('#id_length')?.addEventListener('input', calculatePrice);
+document.querySelector('#id_width')?.addEventListener('input', calculatePrice);
+
+calculatePrice();
+
+function applyPromo() {
+    const code = document.getElementById('promoCode').value;
+    const messageDiv = document.getElementById('promoMessage');
+    
+    if (!code) {
+        messageDiv.innerHTML = '<span data-i18n="Введите промокод">Введите промокод</span>';
+        messageDiv.className = 'promo-message error';
+        return;
+    }
+    
+    fetch('/discounts/apply/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            code: code,
+            amount: originalPrice
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('promoForm').style.display = 'none';
+            document.getElementById('promoApplied').style.display = 'flex';
+            document.getElementById('appliedCode').textContent = code;
+            
+            document.getElementById('discountRow').style.display = 'flex';
+            document.getElementById('discountAmount').innerHTML = `-${data.discount} <span data-i18n="₽">₽</span>`;
+            document.getElementById('finalPrice').innerHTML = `${data.final_price} <span data-i18n="₽">₽</span>`;
+            
+            messageDiv.innerHTML = `<span data-i18n="${data.message}">${data.message}</span>`;
+            messageDiv.className = 'promo-message success';
+        } else {
+            messageDiv.innerHTML = `<span data-i18n="${data.error}">${data.error}</span>`;
+            messageDiv.className = 'promo-message error';
+        }
+    });
+}
+
+function removePromo() {
+    fetch('/discounts/remove/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('promoForm').style.display = 'flex';
+            document.getElementById('promoApplied').style.display = 'none';
+            document.getElementById('promoCode').value = '';
+            
+            document.getElementById('discountRow').style.display = 'none';
+            document.getElementById('finalPrice').innerHTML = originalPrice.toLocaleString() + ' <span data-i18n="₽">₽</span>';
+            
+            document.getElementById('promoMessage').innerHTML = '';
+        }
+    });
+}
+</script>
+{% endblock %}

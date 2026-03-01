@@ -1,0 +1,133 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: en\n"
+
+msgid "Магазин натурального камня"
+msgstr "Natural Stone Store"
+
+msgid "Главная"
+msgstr "Home"
+
+msgid "Каталог"
+msgstr "Catalog"
+
+msgid "Галерея"
+msgstr "Gallery"
+
+msgid "Заказать"
+msgstr "Order"
+
+msgid "Отзывы"
+msgstr "Reviews"
+
+msgid "Подбор камня"
+msgstr "Stone Quiz"
+
+msgid "О нас"
+msgstr "About"
+
+msgid "Контакты"
+msgstr "Contact"
+
+msgid "Избранное"
+msgstr "Wishlist"
+
+msgid "Сравнение"
+msgstr "Comparison"
+
+msgid "Профиль"
+msgstr "Profile"
+
+msgid "Войти"
+msgstr "Login"
+
+msgid "Темная тема"
+msgstr "Dark theme"
+
+msgid "Светлая тема"
+msgstr "Light theme"
+
+msgid "Магазин натурального камня для вашего дома"
+msgstr "Natural stone store for your home"
+
+msgid "Нальчик, ул. Каменная, 15"
+msgstr "Nalchik, Kamennaya st., 15"
+
+msgid "Часы работы"
+msgstr "Working hours"
+
+msgid "Пн-Пт: 9:00 - 19:00"
+msgstr "Mon-Fri: 9:00 AM - 7:00 PM"
+
+msgid "Сб: 10:00 - 16:00"
+msgstr "Sat: 10:00 AM - 4:00 PM"
+
+msgid "Вс: выходной"
+msgstr "Sun: closed"
+
+msgid "Подписка на новости"
+msgstr "Newsletter"
+
+msgid "Будьте в курсе новинок и специальных предложений"
+msgstr "Stay updated with new arrivals and special offers"
+
+msgid "Ваш email"
+msgstr "Your email"
+
+msgid "Подписаться"
+msgstr "Subscribe"
+
+msgid "Все права защищены"
+msgstr "All rights reserved"
+
+msgid "Натуральный камень для вашего дома"
+msgstr "Natural stone for your home"
+
+msgid "Столешницы, подоконники, ступени из гранита и мрамора"
+msgstr "Countertops, window sills, stairs made of granite and marble"
+
+msgid "Смотреть каталог"
+msgstr "View catalog"
+
+msgid "Заказать расчет"
+msgstr "Request quote"
+
+msgid "Категории камня"
+msgstr "Stone categories"
+
+msgid "Популярные камни"
+msgstr "Popular stones"
+
+msgid "Последние отзывы"
+msgstr "Latest reviews"
+
+msgid "Все отзывы"
+msgstr "All reviews"
+
+msgid "Почему выбирают нас"
+msgstr "Why choose us"
+
+msgid "Натуральный камень"
+msgstr "Natural stone"
+
+msgid "Только сертифицированный материал из лучших месторождений"
+msgstr "Only certified material from the best deposits"
+
+msgid "Точный раскрой"
+msgstr "Precision cutting"
+
+msgid "Современное оборудование с ЧПУ для идеального результата"
+msgstr "Modern CNC equipment for perfect results"
+
+msgid "Доставка и монтаж"
+msgstr "Delivery and installation"
+
+msgid "Профессиональная доставка и установка под ключ"
+msgstr "Professional delivery and turnkey installation"
+
+msgid "Гарантия 5 лет"
+msgstr "5 year warranty"
+
+msgid "Даем гарантию на все изделия из камня"
+msgstr "We give warranty on all stone products"

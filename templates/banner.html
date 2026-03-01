@@ -1,0 +1,15 @@
+<div class="banner">
+    <div class="banner-content">
+        <span data-i18n="Corp: {{ corp_name }}">Corp: {{ corp_name }}</span>
+        <span>|</span>
+        <span>{{ tutorial }}</span>
+        <span>|</span>
+        <span>{{ corp_data }}</span>
+        <span>|</span>
+        <span data-i18n="City: {{ city }}">City: {{ city }}</span>
+        {% if site %}
+        <span>|</span>
+        <span data-i18n="Сайт: {{ site }}">Сайт: {{ site }}</span>
+        {% endif %}
+    </div>
+</div>

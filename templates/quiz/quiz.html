@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Подбор камня - StoneStore{% endblock %}
+
+{% block content %}
+<div class="quiz-page">
+    <div class="quiz-header">
+        <h1 data-i18n="🎯 Подбор идеального камня">🎯 Подбор идеального камня</h1>
+        <p data-i18n="Ответьте на 8 вопросов о ваших предпочтениях, и мы подберем идеальный камень для вашего проекта">Ответьте на 8 вопросов о ваших предпочтениях, и мы подберем идеальный камень для вашего проекта</p>
+    </div>
+    
+    <div class="quiz-container">
+        <form method="post" action="{% url 'quiz_results' %}" id="quizForm">
+            {% csrf_token %}
+            
+            <!-- Вопрос 1: Тип помещения -->
+            <div class="question-block">
+                <h3 data-i18n="1. Где будет использоваться камень?">1. Где будет использоваться камень?</h3>
+                <div class="answers">
+                    <label class="answer-option">
+                        <input type="radio" name="question_1" value="1" required>
+                        <span data-i18n="Кухня (столешница, фартук)">Кухня (столешница, фартук)</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_1" value="2">
+                        <span data-i18n="Ванная комната (столешница, пол, стены)">Ванная комната (столешница, пол, стены)</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_1" value="3">
+                        <span data-i18n="Гостиная (подоконники, камин, столешница)">Гостиная (подоконники, камин, столешница)</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_1" value="4">
+                        <span data-i18n="Улица (ступени, дорожки, фасад)">Улица (ступени, дорожки, фасад)</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_1" value="5">
+                        <span data-i18n="Коммерческое помещение (офис, ресторан)">Коммерческое помещение (офис, ресторан)</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Вопрос 2: Интенсивность использования -->
+            <div class="question-block">
+                <h3 data-i18n="2. Как часто будет использоваться поверхность?">2. Как часто будет использоваться поверхность?</h3>
+                <div class="answers">
+                    <label class="answer-option">
+                        <input type="radio" name="question_2" value="6" required>
+                        <span data-i18n="Очень часто (ежедневно, готовка)">Очень часто (ежедневно, готовка)</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_2" value="7">
+                        <span data-i18n="Средне (несколько раз в день)">Средне (несколько раз в день)</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_2" value="8">
+                        <span data-i18n="Редко (декоративное использование)">Редко (декоративное использование)</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Вопрос 3: Контакт с кислотами/жирами -->
+            <div class="question-block">
+                <h3 data-i18n="3. Будет ли контакт с кислотами (лимон, уксус) или жирами?">3. Будет ли контакт с кислотами (лимон, уксус) или жирами?</h3>
+                <div class="answers">
+                    <label class="answer-option">
+                        <input type="radio" name="question_3" value="9" required>
+                        <span data-i18n="Да, регулярно (на кухне)">Да, регулярно (на кухне)</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_3" value="10">
+                        <span data-i18n="Иногда">Иногда</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_3" value="11">
+                        <span data-i18n="Нет">Нет</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Вопрос 4: Температурные нагрузки -->
+            <div class="question-block">
+                <h3 data-i18n="4. Будете ли ставить горячую посуду на поверхность?">4. Будете ли ставить горячую посуду на поверхность?</h3>
+                <div class="answers">
+                    <label class="answer-option">
+                        <input type="radio" name="question_4" value="12" required>
+                        <span data-i18n="Да, постоянно">Да, постоянно</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_4" value="13">
+                        <span data-i18n="Иногда">Иногда</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_4" value="14">
+                        <span data-i18n="Нет, буду использовать подставки">Нет, буду использовать подставки</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Вопрос 5: Предпочтения по цвету -->
+            <div class="question-block">
+                <h3 data-i18n="5. Какой цвет камня вы предпочитаете?">5. Какой цвет камня вы предпочитаете?</h3>
+                <div class="answers">
+                    <label class="answer-option">
+                        <input type="radio" name="question_5" value="15" required>
+                        <span data-i18n="Светлый (белый, бежевый, кремовый)">Светлый (белый, бежевый, кремовый)</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_5" value="16">
+                        <span data-i18n="Темный (черный, серый, коричневый)">Темный (черный, серый, коричневый)</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_5" value="17">
+                        <span data-i18n="Яркий (красный, зеленый, синий)">Яркий (красный, зеленый, синий)</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_5" value="18">
+                        <span data-i18n="С выраженными прожилками и узорами">С выраженными прожилками и узорами</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_5" value="19">
+                        <span data-i18n="Однородный, без узоров">Однородный, без узоров</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Вопрос 6: Текстура поверхности -->
+            <div class="question-block">
+                <h3 data-i18n="6. Какая текстура поверхности вам нравится?">6. Какая текстура поверхности вам нравится?</h3>
+                <div class="answers">
+                    <label class="answer-option">
+                        <input type="radio" name="question_6" value="20" required>
+                        <span data-i18n="Гладкая полированная (глянцевая)">Гладкая полированная (глянцевая)</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_6" value="21">
+                        <span data-i18n="Матовая">Матовая</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_6" value="22">
+                        <span data-i18n="Шероховатая, натуральная">Шероховатая, натуральная</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_6" value="23">
+                        <span data-i18n="Состареная (под античность)">Состареная (под античность)</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Вопрос 7: Бюджет -->
+            <div class="question-block">
+                <h3 data-i18n="7. Какой у вас бюджет?">7. Какой у вас бюджет?</h3>
+                <div class="answers">
+                    <label class="answer-option">
+                        <input type="radio" name="question_7" value="24" required>
+                        <span data-i18n="Эконом (до 5000 ₽/м²)">Эконом (до 5000 ₽/м²)</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_7" value="25">
+                        <span data-i18n="Стандарт (5000-10000 ₽/м²)">Стандарт (5000-10000 ₽/м²)</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_7" value="26">
+                        <span data-i18n="Премиум (10000-20000 ₽/м²)">Премиум (10000-20000 ₽/м²)</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_7" value="27">
+                        <span data-i18n="Люкс (более 20000 ₽/м²)">Люкс (более 20000 ₽/м²)</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Вопрос 8: Стиль интерьера -->
+            <div class="question-block">
+                <h3 data-i18n="8. Какой стиль интерьера у вас в помещении?">8. Какой стиль интерьера у вас в помещении?</h3>
+                <div class="answers">
+                    <label class="answer-option">
+                        <input type="radio" name="question_8" value="28" required>
+                        <span data-i18n="Классический">Классический</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_8" value="29">
+                        <span data-i18n="Современный минимализм">Современный минимализм</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_8" value="30">
+                        <span data-i18n="Лофт">Лофт</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_8" value="31">
+                        <span data-i18n="Прованс / Кантри">Прованс / Кантри</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_8" value="32">
+                        <span data-i18n="Хай-тек">Хай-тек</span>
+                    </label>
+                    <label class="answer-option">
+                        <input type="radio" name="question_8" value="33">
+                        <span data-i18n="Эко-стиль">Эко-стиль</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-primary" data-i18n="Получить результат">Получить результат</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.quiz-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+
+.quiz-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.quiz-header h1 {
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 15px;
+}
+
+.quiz-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.quiz-container {
+    background: var(--bg-primary);
+    border-radius: 30px;
+    padding: 40px;
+    box-shadow: var(--shadow);
+}
+
+.question-block {
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.question-block:last-child {
+    border-bottom: none;
+}
+
+.question-block h3 {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+}
+
+.answers {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.answer-option {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.answer-option:hover {
+    border-color: var(--secondary);
+    background: var(--bg-primary);
+    transform: translateX(10px);
+}
+
+.answer-option input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 15px;
+    cursor: pointer;
+    accent-color: var(--secondary);
+}
+
+.answer-option span {
+    flex: 1;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.form-actions {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.btn-primary {
+    padding: 15px 60px;
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+@media (max-width: 768px) {
+    .quiz-container {
+        padding: 20px;
+    }
+}
+</style>
+
+<script>
+document.getElementById('quizForm').addEventListener('submit', function(e) {
+    const questions = document.querySelectorAll('.question-block');
+    let isValid = true;
+    let firstInvalid = null;
+    
+    questions.forEach(question => {
+        const inputs = question.querySelectorAll('input[type="radio"]:checked');
+        if (inputs.length === 0) {
+            isValid = false;
+            question.style.borderLeft = '4px solid var(--danger)';
+            question.style.paddingLeft = '16px';
+            if (!firstInvalid) firstInvalid = question;
+        } else {
+            question.style.borderLeft = 'none';
+            question.style.paddingLeft = '0';
+        }
+    });
+    
+    if (!isValid) {
+        e.preventDefault();
+        alert('Пожалуйста, ответьте на все вопросы');
+        
+        if (firstInvalid) {
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+});
+</script>
+{% endblock %}

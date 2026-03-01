@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Stone Store - Магазин натурального камня{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="hero-content">
+        <h1 data-i18n="Натуральный камень для вашего дома">Натуральный камень для вашего дома</h1>
+        <p data-i18n="Столешницы, подоконники, ступени из гранита и мрамора">Столешницы, подоконники, ступени из гранита и мрамора</p>
+        <div class="hero-buttons">
+            <a href="{% url 'catalog' %}" class="btn-primary" data-i18n="Смотреть каталог">Смотреть каталог</a>
+            <a href="{% url 'by_product' %}" class="btn-secondary" data-i18n="Заказать расчет">Заказать расчет</a>
+        </div>
+    </div>
+</div>
+
+{% if categories %}
+<div class="categories-section">
+    <h2 data-i18n="Категории камня">Категории камня</h2>
+    <div class="categories-grid">
+        {% for category in categories %}
+        <a href="{% url 'catalog' %}?category={{ category.slug }}" class="category-card">
+            {% if category.image %}
+            <img src="{{ category.image.url }}" alt="{{ category.name }}">
+            {% else %}
+            <div class="category-placeholder">💎</div>
+            {% endif %}
+            <h3>{{ category.name }}</h3>
+            <p>{{ category.description|truncatechars:100 }}</p>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if popular_stones %}
+<div class="popular-section">
+    <h2 data-i18n="🔥 Популярные камни">🔥 Популярные камни</h2>
+    <div class="stone-carousel" id="stone-carousel">
+        <div class="carousel-container">
+            {% for stone in popular_stones %}
+            <div class="carousel-item" data-url="{% url 'stone_detail' stone.slug %}">
+                <img src="{{ stone.main_image.url }}" alt="{{ stone.name }}">
+                <div class="carousel-caption">
+                    <h3>{{ stone.name }}</h3>
+                    <p>{{ stone.price_per_sqm }} ₽/м²</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if recent_reviews %}
+<div class="reviews-section">
+    <h2 data-i18n="Последние отзывы">Последние отзывы</h2>
+    <div class="reviews-grid">
+        {% for review in recent_reviews %}
+        <div class="review-card">
+            <div class="review-header">
+                <span class="review-name">{{ review.name }}</span>
+                {% if review.rating %}
+                <span class="review-rating">
+                    {% for i in "12345"|make_list %}
+                        {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                    {% endfor %}
+                </span>
+                {% endif %}
+            </div>
+            <p class="review-message">{{ review.message|truncatechars:150 }}</p>
+            <span class="review-date">{{ review.created_at|date:"d.m.Y" }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="text-center">
+        <a href="{% url 'questions' %}" class="btn-link" data-i18n="Все отзывы">Все отзывы</a> →
+    </div>
+</div>
+{% endif %}
+
+<div class="features-section">
+    <h2 data-i18n="Почему выбирают нас">Почему выбирают нас</h2>
+    <div class="features-grid">
+        <div class="feature">
+            <div class="feature-icon">💎</div>
+            <h3 data-i18n="Натуральный камень">Натуральный камень</h3>
+            <p data-i18n="Только сертифицированный материал из лучших месторождений">Только сертифицированный материал из лучших месторождений</p>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">✂️</div>
+            <h3 data-i18n="Точный раскрой">Точный раскрой</h3>
+            <p data-i18n="Современное оборудование с ЧПУ для идеального результата">Современное оборудование с ЧПУ для идеального результата</p>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">🚚</div>
+            <h3 data-i18n="Доставка и монтаж">Доставка и монтаж</h3>
+            <p data-i18n="Профессиональная доставка и установка под ключ">Профессиональная доставка и установка под ключ</p>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">⭐</div>
+            <h3 data-i18n="Гарантия 5 лет">Гарантия 5 лет</h3>
+            <p data-i18n="Даем гарантию на все изделия из камня">Даем гарантию на все изделия из камня</p>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="{% static 'css/carousel.css' %}">
+<script src="{% static 'js/carousel.js' %}"></script>
+{% endblock %}

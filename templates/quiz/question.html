@@ -1,0 +1,17 @@
+<div class="question" data-question-id="{{ question.id }}">
+    <h2>{{ question.question }}</h2>
+    
+    <div class="answers">
+        {% for answer in answers %}
+        <label class="answer-option">
+            <input type="{% if question.question_type == 'multiple' %}checkbox{% else %}radio{% endif %}" 
+                   name="answer_{{ question.id }}" 
+                   value="{{ answer.id }}">
+            {% if answer.image %}
+            <img src="{{ answer.image.url }}" alt="" class="answer-image">
+            {% endif %}
+            <span>{{ answer.answer }}</span>
+        </label>
+        {% endfor %}
+    </div>
+</div>

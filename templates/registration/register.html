@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Регистрация - StoneStore{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1 data-i18n="📝 Регистрация">📝 Регистрация</h1>
+            <p data-i18n="Создайте аккаунт, чтобы пользоваться всеми возможностями">Создайте аккаунт, чтобы пользоваться всеми возможностями</p>
+        </div>
+        
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div class="field-error">{{ field.errors.0 }}</div>
+                {% endif %}
+                {% if field.help_text %}
+                <small class="help-text">{{ field.help_text }}</small>
+                {% endif %}
+            </div>
+            {% endfor %}
+            
+            <button type="submit" class="btn-submit" data-i18n="Зарегистрироваться">Зарегистрироваться</button>
+            
+            <div class="auth-links">
+                <p><span data-i18n="Уже есть аккаунт?">Уже есть аккаунт?</span> <a href="{% url 'login' %}" data-i18n="Войти">Войти</a></p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.field-error {
+    color: var(--danger);
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+.help-text {
+    color: var(--gray);
+    font-size: 0.8rem;
+    display: block;
+    margin-top: 5px;
+}
+</style>
+{% endblock %}

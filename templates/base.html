@@ -1,0 +1,196 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stone Store - <span data-i18n="Магазин натурального камня">Магазин натурального камня</span></title>
+    
+    <link rel="stylesheet" href="{% static 'css/background.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.8/jquery.inputmask.min.js"></script>
+    <script src="{% static 'js/i18n.js' %}"></script>
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="{% url 'home' %}">
+                    <span class="logo-icon">💎</span>
+                    <span class="logo-text">StoneStore</span>
+                </a>
+            </div>
+            
+            <nav class="main-nav">
+                <a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}" data-i18n="Главная">Главная</a>
+                <a href="{% url 'catalog' %}" class="{% if '/catalog/' in request.path %}active{% endif %}" data-i18n="Каталог">Каталог</a>
+                <a href="{% url 'gallery' %}" class="{% if '/gallery/' in request.path %}active{% endif %}" data-i18n="Галерея">Галерея</a>
+                <a href="{% url 'by_product' %}" class="{% if '/order/' in request.path %}active{% endif %}" data-i18n="Заказать">Заказать</a>
+                <a href="{% url 'questions' %}" class="{% if '/questions/' in request.path %}active{% endif %}" data-i18n="Отзывы">Отзывы</a>
+                <a href="{% url 'quiz_start' %}" class="{% if '/quiz/' in request.path %}active{% endif %}" data-i18n="Подбор камня">Подбор камня</a>
+                <a href="{% url 'about' %}" class="{% if '/about/' in request.path and not '/contact/' in request.path %}active{% endif %}" data-i18n="О нас">О нас</a>
+                <a href="{% url 'contact' %}" class="{% if '/contact/' in request.path %}active{% endif %}" data-i18n="Контакты">Контакты</a>
+            </nav>
+            
+            <div class="header-actions">
+                <a href="{% url 'wishlist' %}" class="action-link" title="Избранное" data-i18n-title="Избранное">❤️</a>
+                <a href="{% url 'comparison' %}" class="action-link" title="Сравнение" data-i18n-title="Сравнение">⚖️</a>
+                {% if user.is_authenticated %}
+                <a href="{% url 'profile' %}" class="action-link" title="Профиль" data-i18n-title="Профиль">👤</a>
+                <a href="{% url 'logout' %}" class="action-link" title="Выйти" data-i18n-title="Выйти">🚪</a>
+                {% else %}
+                <a href="{% url 'login' %}" class="action-link" title="Войти" data-i18n-title="Войти">🔑</a>
+                {% endif %}
+            </div>
+            
+            <div class="language-selector">
+                <button class="lang-current" data-i18n="🇷🇺 Русский ▼">🇷🇺 Русский ▼</button>
+                <div class="lang-dropdown">
+                    {% csrf_token %}
+                    <button class="lang-option active" value="ru" data-i18n="🇷🇺 Русский">🇷🇺 Русский</button>
+                    <button class="lang-option" value="en" data-i18n="🇬🇧 English">🇬🇧 English</button>
+                </div>
+            </div>
+            
+            <div class="header-contacts">
+                <a href="tel:+79287207877" class="phone">+7 (928) 720-78-77</a>
+            </div>
+        </div>
+    </header>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+            {{ message }}
+            <button class="close-btn" onclick="this.parentElement.remove()">×</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% include "breadcrumbs.html" %}
+
+    <main class="content-wrapper fade-in-scale">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>StoneStore</h3>
+                <p data-i18n="Магазин натурального камня для вашего дома">Магазин натурального камня для вашего дома</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3 data-i18n="Контакты">Контакты</h3>
+                <p>📍 <span data-i18n="Нальчик, ул. Каменная, 15">Нальчик, ул. Каменная, 15</span></p>
+                <p data-i18n="📞 +7 (928) 720-78-77">📞 +7 (928) 720-78-77</p>
+                <p data-i18n="✉️ skywo@mail.ru">✉️ skywo@mail.ru</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3 data-i18n="Часы работы">Часы работы</h3>
+                <p data-i18n="Пн-Пт: 9:00 - 19:00">Пн-Пт: 9:00 - 19:00</p>
+                <p data-i18n="Сб: 10:00 - 16:00">Сб: 10:00 - 16:00</p>
+                <p data-i18n="Вс: выходной">Вс: выходной</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>📧 <span data-i18n="Подписка на новости">Подписка на новости</span></h3>
+                <p data-i18n="Будьте в курсе новинок и специальных предложений">Будьте в курсе новинок и специальных предложений</p>
+                <form class="subscribe-form" id="subscribeForm" onsubmit="subscribe(event)">
+                    {% csrf_token %}
+                    <div class="subscribe-group">
+                        <input type="email" id="subscribeEmail" data-i18n-placeholder="Ваш email" placeholder="Ваш email" required>
+                        <button type="submit" data-i18n="Подписаться">Подписаться</button>
+                    </div>
+                    <div class="subscribe-message" id="subscribeMessage"></div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2026 StoneStore. <span data-i18n="Все права защищены">Все права защищены</span>.</p>
+        </div>
+    </footer>
+
+    {% include "chat/widget.html" %}
+    {% include "payment/payment_stub.html" %}
+
+    <div class="theme-toggle" onclick="toggleTheme()">
+        <span class="theme-icon">🌙</span>
+        <span class="theme-text" data-i18n="Темная тема">Темная тема</span>
+    </div>
+
+    <script src="{% static 'js/background-slider.js' %}"></script>
+    <script src="{% static 'js/animations.js' %}"></script>
+    <script src="{% static 'js/analytics.js' %}"></script>
+    
+    <script>
+    function toggleTheme() {
+        const body = document.body;
+        const isDark = body.classList.contains('dark-theme');
+        const icon = document.querySelector('.theme-icon');
+        const text = document.querySelector('.theme-text');
+        
+        if (isDark) {
+            body.classList.remove('dark-theme');
+            icon.textContent = '🌙';
+            text.textContent = translate('Темная тема');
+            localStorage.setItem('theme', 'light');
+        } else {
+            body.classList.add('dark-theme');
+            icon.textContent = '☀️';
+            text.textContent = translate('Светлая тема');
+            localStorage.setItem('theme', 'dark');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+            document.querySelector('.theme-icon').textContent = '☀️';
+            document.querySelector('.theme-text').textContent = translate('Светлая тема');
+        }
+    });
+
+    function subscribe(event) {
+        event.preventDefault();
+        
+        const email = document.getElementById('subscribeEmail').value;
+        const messageDiv = document.getElementById('subscribeMessage');
+        
+        fetch('/newsletter/subscribe/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ email: email })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                messageDiv.textContent = data.message;
+                messageDiv.style.color = 'var(--success)';
+                document.getElementById('subscribeEmail').value = '';
+            } else {
+                messageDiv.textContent = data.error;
+                messageDiv.style.color = 'var(--danger)';
+            }
+        });
+    }
+
+    $(document).ready(function(){
+        $('.phone-mask').inputmask('+7 (999) 999-99-99');
+    });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
