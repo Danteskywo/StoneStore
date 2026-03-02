@@ -1,3 +1,4 @@
+# Файл для создания категории и камней в категории товаров на сайте.
 import os
 import django
 import random

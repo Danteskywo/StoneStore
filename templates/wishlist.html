@@ -13,7 +13,7 @@
     {% if wishlist_items %}
     <div class="wishlist-grid">
         {% for item in wishlist_items %}
-        <div class="wishlist-card" data-id="{{ item.stone.id }}">
+        <div class="wishlist-card" data-id="{{ item.stone.id }}" data-slug="{{ item.stone.slug }}">
             <div class="card-image">
                 <a href="{% url 'stone_detail' item.stone.slug %}">
                     {% if item.stone.main_image %}
@@ -35,10 +35,10 @@
                 <p class="category">{{ item.stone.category.name }}</p>
                 <p class="price">{{ item.stone.price_per_sqm|floatformat:0 }} ₽/м²</p>
                 <div class="card-actions">
-                    <button class="btn-calc" onclick="openCalculator({{ item.stone.id }})">
+                    <button class="btn-calc" onclick="openCalculator('{{ item.stone.slug }}')">
                         📐 <span data-i18n="Рассчитать">Рассчитать</span>
                     </button>
-                    <button class="btn-order" onclick="quickOrder({{ item.stone.id }})">
+                    <button class="btn-order" onclick="quickOrder('{{ item.stone.slug }}')">
                         <span data-i18n="Заказать">Заказать</span>
                     </button>
                 </div>
@@ -242,6 +242,32 @@
 </style>
 
 <script>
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        background: ${type === 'success' ? '#4CAF50' : '#f44336'};
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 9999;
+        font-weight: 500;
+        animation: slideIn 0.3s ease, fadeOut 0.3s ease 1.7s forwards;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 2000);
+}
+
 function removeFromWishlist(stoneId) {
     fetch(`/wishlist/add/${stoneId}/`, {
         method: 'POST',
@@ -253,26 +279,50 @@ function removeFromWishlist(stoneId) {
     .then(data => {
         if (data.success) {
             document.querySelector(`[data-id="${stoneId}"]`).remove();
-            alert(translate('Удалено из избранного'));
+            showNotification('🗑️ Удалено из избранного', 'success');
             
             if (document.querySelectorAll('.wishlist-card').length === 0) {
-                location.reload();
+                setTimeout(() => {
+                    location.reload();
+                }, 500);
             }
         } else {
-            alert(translate('Ошибка:') + ' ' + data.error);
+            showNotification('❌ Ошибка: ' + data.error, 'error');
         }
     })
     .catch(error => {
-        alert(translate('Ошибка соединения'));
+        showNotification('❌ Ошибка соединения', 'error');
     });
 }
 
-function openCalculator(stoneId) {
-    window.location.href = `/catalog/${stoneId}/#calculator`;
+function openCalculator(stoneSlug) {
+    window.location.href = `/catalog/${stoneSlug}/#calculator`;
 }
 
-function quickOrder(stoneId) {
-    window.location.href = `/order/?stone=${stoneId}`;
+function quickOrder(stoneSlug) {
+    window.location.href = `/order/?stone_slug=${stoneSlug}`;
 }
 </script>
+
+<style>
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+</style>
 {% endblock %}

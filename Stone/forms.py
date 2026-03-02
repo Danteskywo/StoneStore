@@ -86,7 +86,7 @@ class UserForm(forms.Form):
     rating = forms.ChoiceField(
         choices=[(5, '★★★★★'), (4, '★★★★'), (3, '★★★'), (2, '★★'), (1, '★')],
         label="Оценка",
-        required=False,
+        required=True,
         widget=forms.RadioSelect(attrs={'class': 'star-rating'})
     )
     
@@ -341,3 +341,35 @@ class UserProfileForm(forms.ModelForm):
                 'class': 'form-check-input'
             }),
         }
+
+class ContactForm(forms.Form):
+    name = forms.CharField(
+        label='Ваше имя',
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Иванов Иван'
+        })
+    )
+    email = forms.EmailField(
+        label='Ваш email',
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'email@example.com'
+        })
+    )
+    message = forms.CharField(
+        label='Сообщение',
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 5,
+            'placeholder': 'Напишите ваш вопрос...'
+        })
+    )
+    consent = forms.BooleanField(
+        label='Я согласен на обработку персональных данных',
+        required=True,
+        error_messages={
+            'required': 'Необходимо согласие на обработку персональных данных'
+        }
+    )

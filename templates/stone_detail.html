@@ -374,28 +374,89 @@
         position: static;
     }
 }
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
 </style>
 
 <script>
+function showNotification(message, type) {
+    // Создаем элемент уведомления
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    // Стили для уведомления
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        background: ${type === 'success' ? '#4CAF50' : '#f44336'};
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 9999;
+        font-weight: 500;
+        animation: slideIn 0.3s ease, fadeOut 0.3s ease 1.7s forwards;
+    `;
+    
+    // Добавляем на страницу
+    document.body.appendChild(notification);
+    
+    // Удаляем через 2 секунды
+    setTimeout(() => {
+        notification.remove();
+    }, 2000);
+}
+
 function toggleWishlist(btn) {
     {% if user.is_authenticated %}
-        fetch(`/wishlist/add/${btn.dataset.stoneId}/`, {
+        const stoneId = btn.dataset.stoneId;
+        const csrfToken = '{{ csrf_token }}';
+        
+        fetch(`/wishlist/add/${stoneId}/`, {
             method: 'POST',
-            headers: {'X-CSRFToken': '{{ csrf_token }}'}
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin'
         })
-        .then(r => r.json())
+        .then(response => response.json())
         .then(data => {
             if (data.success) {
                 if (data.action === 'added') {
                     btn.classList.add('active');
-                    btn.querySelector('.text').innerHTML = translate('В избранном');
+                    btn.querySelector('.text').innerHTML = 'В избранном';
+                    showNotification('✅ Добавлено в избранное', 'success');
                 } else {
                     btn.classList.remove('active');
-                    btn.querySelector('.text').innerHTML = translate('В избранное');
+                    btn.querySelector('.text').innerHTML = 'В избранное';
+                    showNotification('🗑️ Удалено из избранного', 'success');
                 }
             } else {
-                alert(translate('Ошибка:') + ' ' + data.error);
+                showNotification('❌ Ошибка: ' + data.error, 'error');
             }
+        })
+        .catch(error => {
+            showNotification('❌ Ошибка соединения', 'error');
         });
     {% else %}
         window.location.href = "{% url 'login' %}?next=" + window.location.pathname;
@@ -403,21 +464,30 @@ function toggleWishlist(btn) {
 }
 
 function addToCompare(stoneId) {
+    const csrfToken = '{{ csrf_token }}';
+    
     fetch(`/compare/add/${stoneId}/`, {
         method: 'POST',
-        headers: {'X-CSRFToken': '{{ csrf_token }}'}
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin'
     })
-    .then(r => r.json())
+    .then(response => response.json())
     .then(data => {
         if (data.success) {
             if (data.action === 'added') {
-                alert(translate('Добавлено в сравнение') + ' (' + data.count + '/4)');
+                showNotification(`✅ Добавлено в сравнение (${data.count}/4)`, 'success');
             } else {
-                alert(translate('Удалено из сравнения'));
+                showNotification('🗑️ Удалено из сравнения', 'success');
             }
         } else {
-            alert(translate('Ошибка:') + ' ' + data.error);
+            showNotification('❌ Ошибка: ' + data.error, 'error');
         }
+    })
+    .catch(error => {
+        showNotification('❌ Ошибка соединения', 'error');
     });
 }
 </script>

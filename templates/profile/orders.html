@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Мои заказы - StoneStore{% endblock %}
+
+{% block content %}
+<div class="profile-orders-page">
+    <div class="page-header">
+        <h1 data-i18n="📦 Мои заказы">📦 Мои заказы</h1>
+        <p data-i18n="История ваших заказов">История ваших заказов</p>
+    </div>
+
+    {% if orders %}
+    <div class="orders-list-full">
+        {% for order in orders %}
+        <div class="order-card">
+            <div class="order-card-header">
+                <div class="order-id">
+                    <span data-i18n="Заказ №">Заказ №</span>{{ order.id }}
+                </div>
+                <div class="order-date">{{ order.created_at|date:"d.m.Y H:i" }}</div>
+                <div class="order-status status-{{ order.status }}">
+                    {{ order.get_status_display }}
+                </div>
+            </div>
+            
+            <div class="order-card-body">
+                <div class="order-stone-info">
+                    <div class="stone-image">
+                        {% if order.stone.main_image %}
+                        <img src="{{ order.stone.main_image.url }}" alt="{{ order.stone.name }}">
+                        {% else %}
+                        <div class="no-image">💎</div>
+                        {% endif %}
+                    </div>
+                    <div class="stone-details">
+                        <h3>{{ order.stone.name }}</h3>
+                        <p>{{ order.stone.category.name }}</p>
+                    </div>
+                </div>
+                
+                <div class="order-params">
+                    <div class="param">
+                        <span class="param-label" data-i18n="Размеры:">Размеры:</span>
+                        <span class="param-value">{{ order.length }} x {{ order.width }} м</span>
+                    </div>
+                    <div class="param">
+                        <span class="param-label" data-i18n="Толщина:">Толщина:</span>
+                        <span class="param-value">{{ order.thickness }} мм</span>
+                    </div>
+                    <div class="param">
+                        <span class="param-label" data-i18n="Кромка:">Кромка:</span>
+                        <span class="param-value">{{ order.get_edge_type_display }}</span>
+                    </div>
+                    <div class="param">
+                        <span class="param-label" data-i18n="Мойка:">Мойка:</span>
+                        <span class="param-value">{{ order.get_sink_type_display }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="order-card-footer">
+                <div class="order-price">
+                    <span class="price-label" data-i18n="Сумма:">Сумма:</span>
+                    <span class="price-value">{{ order.total_price|default:order.calculate_price|floatformat:0 }} ₽</span>
+                </div>
+                <a href="{% url 'stone_detail' order.stone.slug %}" class="btn-view" data-i18n="Посмотреть камень">Посмотреть камень</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📦</div>
+        <h3 data-i18n="У вас пока нет заказов">У вас пока нет заказов</h3>
+        <p data-i18n="Перейдите в каталог и сделайте первый заказ">Перейдите в каталог и сделайте первый заказ</p>
+        <a href="{% url 'catalog' %}" class="btn-primary" data-i18n="Перейти в каталог">Перейти в каталог</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.profile-orders-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    color: var(--dark);
+    margin-bottom: 10px;
+}
+
+.orders-list-full {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.order-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+    transition: all 0.3s ease;
+}
+
+.order-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow);
+}
+
+.order-card-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    background: var(--gradient-1);
+    color: white;
+    flex-wrap: wrap;
+}
+
+.order-id {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.order-date {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.order-status {
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    background: rgba(255,255,255,0.2);
+    margin-left: auto;
+}
+
+.order-card-body {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 20px;
+}
+
+.order-stone-info {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.stone-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface);
+}
+
+.stone-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.no-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+}
+
+.stone-details h3 {
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+    color: var(--dark);
+}
+
+.stone-details p {
+    color: var(--gray);
+    font-size: 0.9rem;
+}
+
+.order-params {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.param {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.param-label {
+    font-size: 0.8rem;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.param-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.order-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-top: 1px solid var(--border);
+}
+
+.order-price {
+    font-size: 1.3rem;
+}
+
+.price-label {
+    color: var(--gray);
+    margin-right: 10px;
+}
+
+.price-value {
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.btn-view {
+    padding: 10px 20px;
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-view:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 30px;
+    box-shadow: var(--shadow-light);
+}
+
+.empty-icon {
+    font-size: 5rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+@media (max-width: 768px) {
+    .order-card-body {
+        grid-template-columns: 1fr;
+    }
+    
+    .order-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .order-status {
+        margin-left: 0;
+    }
+}
+</style>
+{% endblock %}

@@ -13,10 +13,10 @@
     <div class="catalog-content">
         <aside class="filters-sidebar">
             <h3 data-i18n="Фильтры">Фильтры</h3>
-            <form method="get" class="filter-form">
+            <form method="get" class="filter-form" id="filterForm">
                 <div class="filter-group">
                     <label data-i18n="Категория">Категория</label>
-                    <select name="category" class="filter-select">
+                    <select name="category" class="filter-select" id="categorySelect">
                         <option value="" data-i18n="Все категории">Все категории</option>
                         {% for category in categories %}
                         <option value="{{ category.slug }}" {% if current_category == category.slug %}selected{% endif %}>
@@ -29,15 +29,15 @@
                 <div class="filter-group">
                     <label data-i18n="Цена за м²">Цена за м²</label>
                     <div class="price-range">
-                        <input type="number" name="min_price" data-i18n-placeholder="от" placeholder="от" value="{{ min_price }}" class="price-input">
+                        <input type="number" name="min_price" id="minPrice" data-i18n-placeholder="от" placeholder="от" value="{{ min_price }}" class="price-input" min="0" step="100">
                         <span>-</span>
-                        <input type="number" name="max_price" data-i18n-placeholder="до" placeholder="до" value="{{ max_price }}" class="price-input">
+                        <input type="number" name="max_price" id="maxPrice" data-i18n-placeholder="до" placeholder="до" value="{{ max_price }}" class="price-input" min="0" step="100">
                     </div>
                 </div>
 
                 <div class="filter-group">
                     <label data-i18n="Твердость (мин)">Твердость (мин)</label>
-                    <select name="hardness" class="filter-select">
+                    <select name="hardness" class="filter-select" id="hardnessSelect">
                         <option value="" data-i18n="Любая">Любая</option>
                         <option value="3" {% if hardness == '3' %}selected{% endif %} data-i18n="от 3 (Мягкий)">от 3 (Мягкий)</option>
                         <option value="5" {% if hardness == '5' %}selected{% endif %} data-i18n="от 5 (Средний)">от 5 (Средний)</option>
@@ -47,7 +47,7 @@
 
                 <div class="filter-group">
                     <label data-i18n="Поиск">Поиск</label>
-                    <input type="text" name="search" data-i18n-placeholder="Название камня..." placeholder="Название камня..." value="{{ search }}" class="filter-input">
+                    <input type="text" name="search" id="searchInput" data-i18n-placeholder="Название камня..." placeholder="Название камня..." value="{{ search }}" class="filter-input">
                 </div>
 
                 <button type="submit" class="btn-filter" data-i18n="Применить">Применить</button>
@@ -58,16 +58,27 @@
         <div class="products-grid">
             <div class="sort-bar">
                 <span data-i18n="Сортировать:">Сортировать:</span>
-                <a href="?sort=-created_at{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}" class="{% if sort == '-created_at' %}active{% endif %}" data-i18n="Новинки">Новинки</a>
-                <a href="?sort=price_asc{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}" class="{% if sort == 'price_asc' %}active{% endif %}" data-i18n="Цена (возр.)">Цена (возр.)</a>
-                <a href="?sort=price_desc{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}" class="{% if sort == 'price_desc' %}active{% endif %}" data-i18n="Цена (убыв.)">Цена (убыв.)</a>
-                <a href="?sort=popular{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}" class="{% if sort == 'popular' %}active{% endif %}" data-i18n="Популярные">Популярные</a>
+                
+                {% comment %} Формируем базовые параметры для ссылок сортировки {% endcomment %}
+                {% with base_params="" %}
+                    {% if current_category %}{% with base_params=base_params|add:"&category="|add:current_category %}{% endwith %}{% endif %}
+                    {% if min_price %}{% with base_params=base_params|add:"&min_price="|add:min_price %}{% endwith %}{% endif %}
+                    {% if max_price %}{% with base_params=base_params|add:"&max_price="|add:max_price %}{% endwith %}{% endif %}
+                    {% if hardness %}{% with base_params=base_params|add:"&hardness="|add:hardness %}{% endwith %}{% endif %}
+                    {% if search %}{% with base_params=base_params|add:"&search="|add:search %}{% endwith %}{% endif %}
+                {% endwith %}
+                
+                <a href="?sort=-created_at{{ base_params }}" class="{% if sort == '-created_at' %}active{% endif %}" data-i18n="Новинки">Новинки</a>
+                <a href="?sort=price_asc{{ base_params }}" class="{% if sort == 'price_asc' %}active{% endif %}" data-i18n="Цена (возр.)">Цена (возр.)</a>
+                <a href="?sort=price_desc{{ base_params }}" class="{% if sort == 'price_desc' %}active{% endif %}" data-i18n="Цена (убыв.)">Цена (убыв.)</a>
+                <a href="?sort=popular{{ base_params }}" class="{% if sort == 'popular' %}active{% endif %}" data-i18n="Популярные">Популярные</a>
+                <a href="?sort=hardness_desc{{ base_params }}" class="{% if sort == 'hardness_desc' %}active{% endif %}" data-i18n="По твердости">По твердости</a>
             </div>
 
             <div class="products">
                 {% for stone in page_obj %}
                 <div class="product-card">
-                    <a href="{% url 'stone_detail' stone.slug %}" class="product-link">
+                    <a href="{% url 'stone_detail' stone.safe_slug %}" class="product-link">
                         <div class="product-image">
                             {% if stone.main_image %}
                             <img src="{{ stone.main_image.url }}" alt="{{ stone.name }}">
@@ -91,7 +102,7 @@
                                 <span class="price">{{ stone.price_per_sqm|floatformat:0 }} ₽/м²</span>
                             </div>
                             <div class="product-features">
-                                <span class="feature-item" data-i18n="⚒️ Твердость: {{ stone.hardness }}/10">⚒️ Твердость: {{ stone.hardness }}/10</span>
+                                <span class="feature-item">⚒️ <span data-i18n="Твердость:">Твердость:</span> {{ stone.hardness }}/10</span>
                                 {% if stone.frost_resistance %}
                                 <span class="feature-item" data-i18n="❄️ Морозостойкий">❄️ Морозостойкий</span>
                                 {% endif %}
@@ -120,7 +131,13 @@
                 <a href="?page={{ page_obj.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if hardness %}&hardness={{ hardness }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="page-link">‹</a>
                 {% endif %}
                 
-                <span class="page-current">{{ page_obj.number }}</span>
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <span class="page-current">{{ num }}</span>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <a href="?page={{ num }}{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if hardness %}&hardness={{ hardness }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="page-link">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
                 
                 {% if page_obj.has_next %}
                 <a href="?page={{ page_obj.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if hardness %}&hardness={{ hardness }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="page-link">›</a>
@@ -485,6 +502,7 @@
     gap: 8px;
     justify-content: center;
     margin-top: 40px;
+    flex-wrap: wrap;
 }
 
 .page-link {
@@ -496,6 +514,8 @@
     font-weight: 600;
     transition: all 0.3s ease;
     background: var(--bg-primary);
+    min-width: 40px;
+    text-align: center;
 }
 
 .page-link:hover {
@@ -511,6 +531,8 @@
     color: white;
     border-radius: 8px;
     font-weight: 600;
+    min-width: 40px;
+    text-align: center;
 }
 
 @media (max-width: 992px) {
@@ -533,27 +555,122 @@
         flex-direction: column;
         align-items: flex-start;
     }
+    
+    .pagination {
+        gap: 5px;
+    }
+    
+    .page-link, .page-current {
+        padding: 8px 12px;
+        min-width: 35px;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
 }
 </style>
 
 <script>
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        background: ${type === 'success' ? '#4CAF50' : '#f44336'};
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 9999;
+        font-weight: 500;
+        animation: slideIn 0.3s ease, fadeOut 0.3s ease 1.7s forwards;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 2000);
+}
+
 function addToCompare(stoneId) {
+    const csrfToken = '{{ csrf_token }}';
+    
     fetch(`/compare/add/${stoneId}/`, {
         method: 'POST',
-        headers: {'X-CSRFToken': '{{ csrf_token }}'}
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin'
     })
-    .then(r => r.json())
+    .then(response => response.json())
     .then(data => {
         if (data.success) {
             if (data.action === 'added') {
-                alert(translate('Добавлено в сравнение') + ' (' + data.count + '/4)');
+                showNotification(`✅ Добавлено в сравнение (${data.count}/4)`, 'success');
             } else {
-                alert(translate('Удалено из сравнения'));
+                showNotification('🗑️ Удалено из сравнения', 'success');
             }
         } else {
-            alert(translate('Ошибка:') + ' ' + data.error);
+            showNotification('❌ Ошибка: ' + data.error, 'error');
         }
+    })
+    .catch(error => {
+        showNotification('❌ Ошибка соединения', 'error');
     });
 }
+
+// Валидация формы перед отправкой
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('filterForm');
+    
+    if (filterForm) {
+        filterForm.addEventListener('submit', function(e) {
+            const minPrice = document.getElementById('minPrice');
+            const maxPrice = document.getElementById('maxPrice');
+            
+            // Проверка цен
+            if (minPrice.value && maxPrice.value) {
+                if (parseFloat(minPrice.value) > parseFloat(maxPrice.value)) {
+                    e.preventDefault();
+                    alert('Минимальная цена не может быть больше максимальной');
+                    return false;
+                }
+            }
+            
+            // Удаляем пустые значения, чтобы URL был чище
+            const inputs = this.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                if (!input.value) {
+                    input.disabled = true;
+                }
+            });
+            
+            return true;
+        });
+    }
+});
 </script>
 {% endblock %}

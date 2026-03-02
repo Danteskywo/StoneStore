@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.html import format_html
 from django.urls import reverse
-from .models import User, Stone, StoneCategory, StoneImage, CountertopOrder, Feedback, Wishlist, Comparison
+from .models import ContactMessage, User, Stone, StoneCategory, StoneImage, CountertopOrder, Feedback, Wishlist, Comparison
 
 class StoneImageInline(admin.TabularInline):
     model = StoneImage
@@ -231,3 +231,38 @@ class ComparisonAdmin(admin.ModelAdmin):
     def stones_count(self, obj):
         return obj.stones.count()
     stones_count.short_description = 'Камней'
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ['name', 'email', 'created_at', 'is_read', 'short_message']
+    list_filter = ['is_read', 'created_at']
+    search_fields = ['name', 'email', 'message']
+    readonly_fields = ['created_at']
+    list_editable = ['is_read']
+    date_hierarchy = 'created_at'
+    
+    fieldsets = (
+        ('Контактная информация', {
+            'fields': ('name', 'email', 'created_at')
+        }),
+        ('Сообщение', {
+            'fields': ('message',)
+        }),
+        ('Статус', {
+            'fields': ('is_read',)
+        }),
+    )
+    
+    def short_message(self, obj):
+        return obj.message[:50] + '...' if len(obj.message) > 50 else obj.message
+    short_message.short_description = 'Сообщение'
+    
+    actions = ['mark_as_read', 'mark_as_unread']
+    
+    def mark_as_read(self, request, queryset):
+        queryset.update(is_read=True)
+    mark_as_read.short_description = "Отметить как прочитанные"
+    
+    def mark_as_unread(self, request, queryset):
+        queryset.update(is_read=False)
+    mark_as_unread.short_description = "Отметить как непрочитанные"

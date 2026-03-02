@@ -247,9 +247,58 @@
     color: var(--text-secondary);
     margin-bottom: 30px;
 }
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
 </style>
 
 <script>
+function showNotification(message, type) {
+    // Создаем элемент уведомления
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    // Стили для уведомления
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        background: ${type === 'success' ? '#4CAF50' : '#f44336'};
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 9999;
+        font-weight: 500;
+        animation: slideIn 0.3s ease, fadeOut 0.3s ease 1.7s forwards;
+    `;
+    
+    // Добавляем на страницу
+    document.body.appendChild(notification);
+    
+    // Удаляем через 2 секунды
+    setTimeout(() => {
+        notification.remove();
+    }, 2000);
+}
+
 function removeFromCompare(stoneId) {
     fetch(`/compare/remove/${stoneId}/`, {
         method: 'POST',
@@ -260,13 +309,16 @@ function removeFromCompare(stoneId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            location.reload();
+            showNotification('🗑️ Удалено из сравнения', 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 500);
         } else {
-            alert(translate('Ошибка:') + ' ' + data.error);
+            showNotification('❌ Ошибка: ' + data.error, 'error');
         }
     })
     .catch(error => {
-        alert(translate('Ошибка соединения'));
+        showNotification('❌ Ошибка соединения', 'error');
     });
 }
 

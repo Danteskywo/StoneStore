@@ -3,6 +3,8 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator, FileExtensionValidator
 from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.utils import timezone
+from datetime import timedelta
 import os
 
 def validate_image_size(image):
@@ -359,6 +361,23 @@ class Feedback(models.Model):
         ('rejected', 'Отклонен'),
     ]
     
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True,
+        verbose_name='Пользователь',
+        related_name='feedbacks'
+    )
+    parent = models.ForeignKey(
+        'self', 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True,
+        verbose_name='Ответ на',
+        related_name='replies'
+    )
+    
     request_type = models.CharField(
         max_length=10, 
         choices=CHOICE_TYPE, 
@@ -411,7 +430,8 @@ class Feedback(models.Model):
     )
     moderation_comment = models.TextField(blank=True, verbose_name='Комментарий модератора')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания', db_index=True)
-    is_published = models.BooleanField(default=True, verbose_name='Опубликовано', db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+    is_published = models.BooleanField(default=False, verbose_name='Опубликовано', db_index=True)
     
     class Meta:
         verbose_name = "Обратная связь"
@@ -420,6 +440,7 @@ class Feedback(models.Model):
         indexes = [
             models.Index(fields=['moderation_status', 'is_published']),
             models.Index(fields=['request_type', 'rating']),
+            models.Index(fields=['user', 'created_at']),
         ]
         permissions = [
             ("can_moderate_feedback", "Может модерировать отзывы"),
@@ -427,6 +448,17 @@ class Feedback(models.Model):
     
     def __str__(self):
         return f"{self.name} - {self.created_at}"
+    
+    def can_delete(self, user):
+        """Проверяет, может ли пользователь удалить этот отзыв"""
+        if not user.is_authenticated:
+            return False
+        if user.is_staff or user.has_perm('Stone.can_moderate_feedback'):
+            return True
+        # Пользователь может удалить свой отзыв в течение 24 часов после создания
+        if self.user == user and timezone.now() - self.created_at < timedelta(hours=24):
+            return True
+        return False
     
     def save(self, *args, **kwargs):
         # Проверка изменения номера телефона
@@ -453,6 +485,15 @@ class Feedback(models.Model):
             self.is_published = False
             
         super().save(*args, **kwargs)
+    
+    def save_with_user(self, user, *args, **kwargs):
+        """Сохраняет с указанием пользователя для определения прав"""
+        self.user = user if user.is_authenticated else None
+        # Если пользователь - модератор или админ, сразу одобряем
+        if user.is_authenticated and (user.is_staff or user.has_perm('Stone.can_moderate_feedback')):
+            self.moderation_status = 'approved'
+            self.is_published = True
+        self.save(*args, **kwargs)
 
 class Wishlist(models.Model):
     user = models.ForeignKey(
@@ -502,3 +543,19 @@ class Comparison(models.Model):
         """Валидация количества камней в сравнении"""
         if self.pk and self.stones.count() > 4:
             raise ValidationError('Можно сравнивать не более 4 камней')
+
+class ContactMessage(models.Model):
+    """Сообщения из формы контактов"""
+    name = models.CharField(max_length=100, verbose_name='Имя')
+    email = models.EmailField(verbose_name='Email')
+    message = models.TextField(verbose_name='Сообщение')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата отправки')
+    is_read = models.BooleanField(default=False, verbose_name='Прочитано')
+    
+    class Meta:
+        verbose_name = 'Сообщение с контактов'
+        verbose_name_plural = 'Сообщения с контактов'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.name} - {self.created_at.strftime('%d.%m.%Y %H:%M')}"

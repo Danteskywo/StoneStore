@@ -159,6 +159,7 @@
     border-radius: 15px;
     font-size: 0.9rem;
     word-wrap: break-word;
+    animation: fadeIn 0.3s ease;
 }
 
 .message.user {
@@ -196,44 +197,71 @@
     border-top: 1px solid var(--border);
     display: flex;
     gap: 10px;
+    background: white;
 }
 
 .chat-input {
     flex: 1;
-    padding: 10px;
+    padding: 12px 15px;
     border: 2px solid var(--surface);
-    border-radius: 20px;
+    border-radius: 25px;
     resize: none;
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    max-height: 120px;
 }
 
 .chat-input:focus {
     outline: none;
     border-color: var(--secondary);
+    box-shadow: 0 0 0 3px rgba(247, 37, 133, 0.1);
 }
 
 .chat-send {
-    width: 40px;
-    height: 40px;
-    background: var(--secondary);
-    color: var(--dark);
+    width: 45px;
+    height: 45px;
+    background: var(--gradient-2);
+    color: white;
     border: none;
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    align-self: flex-end;
 }
 
 .chat-send:hover {
-    transform: scale(1.1);
-    background: var(--secondary-light);
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: var(--shadow);
+}
+
+.chat-send:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @media (max-width: 768px) {
     .chat-window {
         width: 300px;
-        height: 400px;
+        height: 450px;
         right: 0;
+        bottom: 70px;
     }
 }
 </style>
@@ -242,6 +270,17 @@
 let chatVisible = false;
 let lastMessageId = 0;
 let checkInterval;
+let isSending = false;
+let messageIds = new Set(); // Для отслеживания уже добавленных сообщений
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    // Добавляем ID для системного сообщения
+    const systemMsg = document.querySelector('.message.system');
+    if (systemMsg) {
+        systemMsg.id = 'msg-system';
+    }
+});
 
 function toggleChat() {
     const window = document.getElementById('chatWindow');
@@ -249,9 +288,18 @@ function toggleChat() {
     
     if (chatVisible) {
         window.classList.add('active');
+        // Сбрасываем lastMessageId при открытии, чтобы загрузить все сообщения
+        lastMessageId = 0;
+        messageIds.clear(); // Очищаем Set сообщений
         loadMessages();
         checkInterval = setInterval(loadMessages, 3000);
         checkOperator();
+        
+        // Прокручиваем вниз
+        setTimeout(() => {
+            const container = document.getElementById('chatMessages');
+            container.scrollTop = container.scrollHeight;
+        }, 100);
     } else {
         window.classList.remove('active');
         clearInterval(checkInterval);
@@ -259,10 +307,18 @@ function toggleChat() {
 }
 
 function sendMessage() {
+    // Защита от множественной отправки
+    if (isSending) return;
+    
     const input = document.getElementById('chatInput');
     const text = input.value.trim();
     
     if (!text) return;
+    
+    // Блокируем кнопку отправки
+    isSending = true;
+    const sendButton = document.querySelector('.chat-send');
+    sendButton.disabled = true;
     
     fetch('/chat/send/', {
         method: 'POST',
@@ -278,7 +334,21 @@ function sendMessage() {
             addMessage(data.message);
             input.value = '';
             input.style.height = 'auto';
+            // Обновляем lastMessageId
+            lastMessageId = data.message.id;
+        } else {
+            console.error('Ошибка отправки:', data.error);
+            alert('Не удалось отправить сообщение. Попробуйте еще раз.');
         }
+    })
+    .catch(error => {
+        console.error('Ошибка соединения:', error);
+        alert('Ошибка соединения. Проверьте подключение к интернету.');
+    })
+    .finally(() => {
+        // Разблокируем кнопку отправки
+        isSending = false;
+        sendButton.disabled = false;
     });
 }
 
@@ -286,21 +356,40 @@ function loadMessages() {
     fetch(`/chat/messages/?last_id=${lastMessageId}`)
         .then(response => response.json())
         .then(data => {
-            if (data.success && data.messages.length > 0) {
-                data.messages.forEach(msg => addMessage(msg));
-                lastMessageId = data.messages[data.messages.length - 1].id;
+            if (data.success && data.messages && data.messages.length > 0) {
+                // Фильтруем только новые сообщения
+                const newMessages = data.messages.filter(msg => !messageIds.has(msg.id));
+                
+                newMessages.forEach(msg => {
+                    addMessage(msg);
+                    messageIds.add(msg.id);
+                });
+                
+                // Обновляем lastMessageId на ID последнего сообщения
+                if (data.messages.length > 0) {
+                    lastMessageId = data.messages[data.messages.length - 1].id;
+                }
             }
-        });
+        })
+        .catch(error => console.error('Ошибка загрузки сообщений:', error));
 }
 
 function addMessage(message) {
     const container = document.getElementById('chatMessages');
+    
+    // Проверяем, есть ли уже такое сообщение
+    if (document.getElementById(`msg-${message.id}`)) {
+        return;
+    }
+    
     const msgDiv = document.createElement('div');
+    msgDiv.id = `msg-${message.id}`;
     msgDiv.className = `message ${message.is_operator ? 'operator' : 'user'}`;
     msgDiv.innerHTML = `
         ${message.text}
         <div class="message-time">${message.time}</div>
     `;
+    
     container.appendChild(msgDiv);
     container.scrollTop = container.scrollHeight;
 }
@@ -314,20 +403,38 @@ function checkOperator() {
             
             if (data.has_operator) {
                 statusDot.className = 'status-dot active';
-                statusText.textContent = `${data.operator_name} онлайн`;
+                statusText.textContent = `${data.operator_name} ${window.translate ? window.translate('онлайн') : 'онлайн'}`;
+            } else {
+                statusDot.className = 'status-dot waiting';
+                statusText.textContent = window.translate ? window.translate('Ожидание оператора') : 'Ожидание оператора';
             }
-        });
+        })
+        .catch(error => console.error('Ошибка проверки оператора:', error));
 }
 
-document.getElementById('chatInput').addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = (this.scrollHeight) + 'px';
-});
+// Обработка ввода текста
+const chatInput = document.getElementById('chatInput');
+if (chatInput) {
+    chatInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
 
-document.getElementById('chatInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
+    chatInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+}
+
+// Очищаем интервал при закрытии страницы
+window.addEventListener('beforeunload', function() {
+    if (checkInterval) {
+        clearInterval(checkInterval);
     }
 });
+
+// Функция для перевода (если не определена глобально)
+window.translate = window.translate || function(text) { return text; };
 </script>

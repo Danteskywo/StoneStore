@@ -21,6 +21,7 @@
                 
                 <form method="post" class="feedback-form" enctype="multipart/form-data" id="feedbackForm">
                     {% csrf_token %}
+                    <input type="hidden" name="parent_id" id="parent_id" value="">
                     
                     <!-- Тип обращения -->
                     <div class="form-group mb-4">
@@ -120,11 +121,11 @@
                     </div>
 
                     <!-- Согласие -->
-                    <div class="form-group mb-4">
-                        <label class="checkbox-modern">
+                    <div class="consent-group">
+                        <label class="consent-label">
                             {{ form.consent }}
-                            <span class="checkbox-custom"></span>
-                            <span class="checkbox-text" data-i18n="{{ form.consent.label }}">{{ form.consent.label }}</span>
+                            <span class="consent-checkbox"></span>
+                            <span class="consent-text" data-i18n="Я согласен на обработку персональных данных">Я согласен на обработку персональных данных</span>
                         </label>
                     </div>
 
@@ -183,7 +184,7 @@
             <!-- Список отзывов -->
             <div class="reviews-list">
                 {% for item in page_obj %}
-                <div class="review-item-modern" data-id="{{ item.id }}">
+                <div class="review-item-modern" data-id="{{ item.id }}" data-user-id="{{ item.user.id }}">
                     <div class="review-header">
                         <div class="reviewer-info">
                             <div class="reviewer-avatar">
@@ -200,7 +201,14 @@
                                 </span>
                             </div>
                         </div>
-                        <span class="review-date">{{ item.created_at|date:"d.m.Y H:i" }}</span>
+                        <div class="review-actions">
+                            <span class="review-date">{{ item.created_at|date:"d.m.Y H:i" }}</span>
+                            {% if item.can_delete_flag %}
+                            <button class="delete-review-btn" onclick="deleteFeedback({{ item.id }})" title="Удалить">
+                                <span class="delete-icon">🗑️</span>
+                            </button>
+                            {% endif %}
+                        </div>
                     </div>
                     
                     {% if item.request_type == 'review' and item.rating %}
@@ -253,15 +261,41 @@
                     </div>
                     {% endif %}
                     
+                    <!-- Ответы на отзыв -->
+                    {% if item.replies.all %}
+                    <div class="review-replies">
+                        {% for reply in item.replies.all %}
+                        <div class="reply-item" data-id="{{ reply.id }}">
+                            <div class="reply-header">
+                                <span class="reply-author">{{ reply.name }}</span>
+                                <span class="reply-date">{{ reply.created_at|date:"d.m.Y H:i" }}</span>
+                                {% if reply.can_delete_flag %}
+                                <button class="delete-reply-btn" onclick="deleteFeedback({{ reply.id }})" title="Удалить">
+                                    <span class="delete-icon">🗑️</span>
+                                </button>
+                                {% endif %}
+                            </div>
+                            <div class="reply-message">{{ reply.message }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Кнопка ответа -->
                     <div class="review-footer">
-                        <button class="like-btn" onclick="likeReview({{ item.id }})">
-                            <span class="like-icon">❤️</span>
-                            <span class="like-count">0</span>
-                        </button>
-                        <button class="reply-btn" onclick="replyToReview({{ item.id }})">
+                        <button class="reply-btn" onclick="showReplyForm({{ item.id }})">
                             <span class="reply-icon">↩️</span>
                             <span data-i18n="Ответить">Ответить</span>
                         </button>
+                    </div>
+                    
+                    <!-- Форма ответа (скрыта по умолчанию) -->
+                    <div class="reply-form" id="reply-form-{{ item.id }}" style="display: none;">
+                        <textarea class="reply-input" placeholder="Ваш ответ..." rows="3"></textarea>
+                        <div class="reply-actions">
+                            <button class="btn-cancel" onclick="hideReplyForm({{ item.id }})">Отмена</button>
+                            <button class="btn-submit" onclick="submitReply({{ item.id }})">Отправить</button>
+                        </div>
                     </div>
                 </div>
                 {% empty %}
@@ -358,7 +392,7 @@
     font-size: 0.9rem;
 }
 
-/* Звездный рейтинг - базовые стили */
+/* Звездный рейтинг */
 .star-rating {
     display: flex;
     flex-direction: row-reverse;
@@ -442,55 +476,167 @@
     display: block;
 }
 
-/* Чекбокс */
-.checkbox-modern {
+/* Стили для чекбокса согласия */
+.consent-group {
+    margin: 20px 0 25px 0;
+    width: 100%;
+}
+
+.consent-label {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
     cursor: pointer;
-    padding: 10px;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
-    border-radius: var(--radius-sm);
+    user-select: none;
 }
 
-.checkbox-modern input {
-    display: none;
+.consent-label input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
 }
 
-.checkbox-custom {
-    width: 30px;
-    height: 30px;
+.consent-checkbox {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
     background: white;
     border: 2px solid var(--primary);
-    border-radius: 8px;
+    border-radius: 4px;
     position: relative;
-    transition: var(--transition);
+    flex-shrink: 0;
+    transition: all 0.2s ease;
 }
 
-.checkbox-modern input:checked + .checkbox-custom {
-    background: var(--gradient-2);
-    border-color: transparent;
-    transform: rotate(15deg);
+.consent-label input[type="checkbox"]:checked + .consent-checkbox {
+    background: var(--primary);
+    border-color: var(--primary);
 }
 
-.checkbox-modern input:checked + .checkbox-custom::after {
+.consent-label input[type="checkbox"]:checked + .consent-checkbox::after {
     content: '✓';
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     color: white;
-    font-size: 1.5rem;
+    font-size: 14px;
     font-weight: bold;
 }
 
-.checkbox-text {
-    flex: 1;
-    color: var(--dark);
-    font-weight: 500;
+.consent-text {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    line-height: 1.4;
 }
 
-/* Элементы отзывов */
+/* Стили для ответов */
+.review-replies {
+    margin-left: 40px;
+    margin-top: 20px;
+    padding-left: 20px;
+    border-left: 3px solid var(--primary-light);
+}
+
+.reply-item {
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 10px;
+}
+
+.reply-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.reply-author {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.reply-date {
+    font-size: 0.8rem;
+    color: var(--gray);
+}
+
+.reply-message {
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+/* Стили для кнопок действий */
+.review-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.delete-review-btn,
+.delete-reply-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 5px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    color: var(--danger);
+}
+
+.delete-review-btn:hover,
+.delete-reply-btn:hover {
+    background: var(--danger);
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Форма ответа */
+.reply-form {
+    margin-top: 15px;
+    padding: 15px;
+    background: var(--bg-secondary);
+    border-radius: 10px;
+}
+
+.reply-input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-family: 'Montserrat', sans-serif;
+    margin-bottom: 10px;
+    resize: vertical;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.reply-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.btn-cancel {
+    padding: 8px 20px;
+    background: var(--gray-light);
+    color: var(--dark);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+    background: var(--gray);
+    color: white;
+}
+
+/* Остальные стили */
 .review-item-modern {
     background: white;
     border-radius: var(--radius);
@@ -1065,16 +1211,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const starLabels = document.querySelectorAll('.star-label');
     
     if (starWrappers.length > 0) {
-        // Функция обновления звезд
         function updateStars(value) {
-            // Получаем все звезды в правильном порядке
             const stars = Array.from(document.querySelectorAll('.star-label'));
-            
-            // Из-за row-reverse нам нужно перевернуть массив для правильного индексирования
             const starsReversed = [...stars].reverse();
             
             starsReversed.forEach((star, index) => {
-                // Индексация: 0 = 1 звезда, 1 = 2 звезды, 2 = 3 звезды, 3 = 4 звезды, 4 = 5 звезд
                 if (index < value) {
                     star.style.color = '#ffc107';
                     star.classList.add('selected');
@@ -1085,33 +1226,23 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // Обработчики для каждой звезды
         starWrappers.forEach((wrapper, index) => {
             const starLabel = wrapper.querySelector('.star-label');
             const starInput = wrapper.querySelector('input[type="radio"]');
             
             if (starLabel && starInput) {
-                // Клик по звезде
                 starLabel.addEventListener('click', function(e) {
                     e.preventDefault();
                     const value = parseInt(starInput.value);
-                    
-                    // Устанавливаем радио-кнопку
                     starInput.checked = true;
-                    
-                    // Обновляем звезды
                     updateStars(value);
                     
-                    // Триггерим событие change для формы
                     const event = new Event('change', { bubbles: true });
                     starInput.dispatchEvent(event);
                 });
                 
-                // Наведение на звезду
                 starLabel.addEventListener('mouseenter', function(e) {
                     const value = parseInt(starInput.value);
-                    
-                    // Подсвечиваем звезды до текущей
                     const stars = Array.from(document.querySelectorAll('.star-label'));
                     const starsReversed = [...stars].reverse();
                     
@@ -1126,16 +1257,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Убираем наведение со всего контейнера
         const starRating = document.getElementById('starRating');
         if (starRating) {
             starRating.addEventListener('mouseleave', function(e) {
-                // Возвращаем состояние в соответствии с выбранной звездой
                 const checkedInput = document.querySelector('.star-rating input[type="radio"]:checked');
                 if (checkedInput) {
                     updateStars(parseInt(checkedInput.value));
                 } else {
-                    // Если ничего не выбрано - все серые
                     document.querySelectorAll('.star-label').forEach(star => {
                         star.style.color = '#ccc';
                         star.classList.remove('selected');
@@ -1144,7 +1272,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // Инициализация при загрузке
         const checkedInput = document.querySelector('.star-rating input[type="radio"]:checked');
         if (checkedInput) {
             updateStars(parseInt(checkedInput.value));
@@ -1175,13 +1302,11 @@ function replyToReview(id) {
     const form = document.getElementById('feedbackForm');
     form.scrollIntoView({ behavior: 'smooth' });
     
-    // Подсветка формы
     form.style.animation = 'pulse 0.5s';
     setTimeout(() => {
         form.style.animation = '';
     }, 500);
     
-    // Автоматически выбираем тип "Вопрос"
     const questionRadio = document.querySelector('input[name="langs"][value="question"]');
     if (questionRadio) {
         questionRadio.checked = true;
@@ -1195,5 +1320,105 @@ document.addEventListener('keydown', function(e) {
         closeGallery();
     }
 });
+
+// Удаление отзыва/вопроса
+function deleteFeedback(feedbackId) {
+    if (!confirm('Вы уверены, что хотите удалить это сообщение?')) {
+        return;
+    }
+    
+    fetch(`/feedback/delete/${feedbackId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Удаляем элемент из DOM
+            const element = document.querySelector(`[data-id="${feedbackId}"]`);
+            if (element) {
+                element.remove();
+            }
+            showNotification('Сообщение удалено', 'success');
+        } else {
+            showNotification('Ошибка: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Ошибка соединения', 'error');
+    });
+}
+
+// Показать форму ответа
+function showReplyForm(feedbackId) {
+    document.getElementById(`reply-form-${feedbackId}`).style.display = 'block';
+}
+
+// Скрыть форму ответа
+function hideReplyForm(feedbackId) {
+    document.getElementById(`reply-form-${feedbackId}`).style.display = 'none';
+}
+
+// Отправить ответ
+function submitReply(feedbackId) {
+    const form = document.getElementById(`reply-form-${feedbackId}`);
+    const input = form.querySelector('.reply-input');
+    const message = input.value.trim();
+    
+    if (!message) {
+        alert('Введите сообщение');
+        return;
+    }
+    
+    fetch(`/feedback/reply/${feedbackId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: message })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Перезагружаем страницу для отображения ответа
+            location.reload();
+        } else {
+            alert('Ошибка: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Ошибка соединения');
+    });
+}
+
+// Функция для показа уведомлений
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        background: ${type === 'success' ? '#4CAF50' : '#f44336'};
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 9999;
+        font-weight: 500;
+        animation: slideIn 0.3s ease, fadeOut 0.3s ease 1.7s forwards;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 2000);
+}
 </script>
 {% endblock %}
