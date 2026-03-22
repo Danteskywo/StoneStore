@@ -12,7 +12,6 @@ def validate_image_size(image):
     if image.size > 5 * 1024 * 1024:
         raise ValidationError('Размер изображения не должен превышать 5MB')
     
-    # Проверка расширения файла
     ext = os.path.splitext(image.name)[1].lower()
     if ext not in ['.jpg', '.jpeg', '.png', '.gif', '.webp']:
         raise ValidationError('Поддерживаются только изображения форматов: JPG, PNG, GIF, WEBP')
@@ -44,7 +43,6 @@ class User(AbstractUser):
         return self.username
     
     def get_full_name(self):
-        """Возвращает полное имя пользователя"""
         if self.first_name and self.last_name:
             return f"{self.first_name} {self.last_name}"
         return self.username
@@ -142,7 +140,6 @@ class Stone(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата добавления', db_index=True)
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
     
-    # Цены для калькулятора
     cutting_price_per_m = models.DecimalField(
         max_digits=10, 
         decimal_places=2, 
@@ -187,13 +184,11 @@ class Stone(models.Model):
         return self.name
     
     def get_available_finishes_list(self):
-        """Возвращает список доступных обработок"""
         if not self.available_finishes:
             return []
         return [f.strip() for f in self.available_finishes.split(',') if f.strip()]
     
     def get_available_thickness_list(self):
-        """Возвращает список доступных толщин"""
         if not self.available_thickness:
             return []
         thicknesses = []
@@ -205,14 +200,12 @@ class Stone(models.Model):
         return thicknesses
     
     def get_edge_price(self, edge_type):
-        """Возвращает цену для указанного типа кромки"""
         if not self.edge_processing_prices:
             return 0
         return float(self.edge_processing_prices.get(edge_type, 0))
     
     @property
     def is_available(self):
-        """Проверяет доступность камня"""
         return self.in_stock and self.stock_quantity > 0
 
 class StoneImage(models.Model):
@@ -239,7 +232,6 @@ class StoneImage(models.Model):
         return f"{self.stone.name} - {self.order}"
     
     def save(self, *args, **kwargs):
-        # Если это главное изображение, снимаем флаг с других
         if self.is_main:
             StoneImage.objects.filter(stone=self.stone, is_main=True).update(is_main=False)
         super().save(*args, **kwargs)
@@ -294,20 +286,12 @@ class CountertopOrder(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата заказа', db_index=True)
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
     
-    # Поля для хранения рассчитанных значений
     total_price = models.DecimalField(
         max_digits=10, 
         decimal_places=2, 
         null=True, 
         blank=True, 
         verbose_name='Итоговая цена'
-    )
-    promo_code = models.CharField(max_length=50, blank=True, verbose_name='Промокод')
-    discount_amount = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2, 
-        default=0, 
-        verbose_name='Скидка'
     )
     
     class Meta:
@@ -323,20 +307,12 @@ class CountertopOrder(models.Model):
         return f"Заказ #{self.id} - {self.customer_name}"
     
     def calculate_area(self):
-        """Расчет площади"""
         return float(self.length) * float(self.width)
     
     def calculate_price(self):
-        """Расчет базовой цены"""
         return self.calculate_area() * float(self.stone.price_per_sqm)
     
-    def calculate_total_with_discount(self):
-        """Расчет итоговой цены со скидкой"""
-        base_price = self.calculate_price()
-        return base_price - float(self.discount_amount)
-    
     def save(self, *args, **kwargs):
-        # Автоматический расчет цены при сохранении
         if not self.total_price:
             self.total_price = self.calculate_price()
         super().save(*args, **kwargs)
@@ -450,18 +426,15 @@ class Feedback(models.Model):
         return f"{self.name} - {self.created_at}"
     
     def can_delete(self, user):
-        """Проверяет, может ли пользователь удалить этот отзыв"""
         if not user.is_authenticated:
             return False
         if user.is_staff or user.has_perm('Stone.can_moderate_feedback'):
             return True
-        # Пользователь может удалить свой отзыв в течение 24 часов после создания
         if self.user == user and timezone.now() - self.created_at < timedelta(hours=24):
             return True
         return False
     
     def save(self, *args, **kwargs):
-        # Проверка изменения номера телефона
         if self.pk:
             try:
                 original = Feedback.objects.get(pk=self.pk)
@@ -471,14 +444,12 @@ class Feedback(models.Model):
             except Feedback.DoesNotExist:
                 pass
         
-        # Автоматическая привязка к заказу
         if self.numTel and not self.order:
             order = CountertopOrder.objects.filter(customer_phone=self.numTel).first()
             if order:
                 self.order = order
                 self.is_verified = True
         
-        # Автоматическая публикация при одобрении
         if self.moderation_status == 'approved':
             self.is_published = True
         elif self.moderation_status == 'rejected':
@@ -487,9 +458,7 @@ class Feedback(models.Model):
         super().save(*args, **kwargs)
     
     def save_with_user(self, user, *args, **kwargs):
-        """Сохраняет с указанием пользователя для определения прав"""
         self.user = user if user.is_authenticated else None
-        # Если пользователь - модератор или админ, сразу одобряем
         if user.is_authenticated and (user.is_staff or user.has_perm('Stone.can_moderate_feedback')):
             self.moderation_status = 'approved'
             self.is_published = True
@@ -540,12 +509,10 @@ class Comparison(models.Model):
         return f"Сравнение #{self.id}"
     
     def clean(self):
-        """Валидация количества камней в сравнении"""
         if self.pk and self.stones.count() > 4:
             raise ValidationError('Можно сравнивать не более 4 камней')
 
 class ContactMessage(models.Model):
-    """Сообщения из формы контактов"""
     name = models.CharField(max_length=100, verbose_name='Имя')
     email = models.EmailField(verbose_name='Email')
     message = models.TextField(verbose_name='Сообщение')

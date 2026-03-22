@@ -28,13 +28,11 @@ import re
 logger = logging.getLogger(__name__)
 
 def clean_search_param(value):
-    """Очищает поисковый параметр от лишних символов"""
     if not value or value == 'None':
         return ''
     return value.strip()
 
 def clean_price_param(value):
-    """Очищает ценовой параметр"""
     if not value or value == 'None':
         return None
     try:
@@ -43,7 +41,6 @@ def clean_price_param(value):
         return None
 
 def clean_int_param(value):
-    """Очищает целочисленный параметр"""
     if not value or value == 'None':
         return None
     try:
@@ -52,10 +49,8 @@ def clean_int_param(value):
         return None
 
 def create_safe_slug(name):
-    """Создает безопасный slug из названия"""
     if not name:
         return ''
-    # Транслитерация кириллицы в латиницу
     translit_map = {
         'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e',
         'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
@@ -68,12 +63,9 @@ def create_safe_slug(name):
         'Ф': 'F', 'Х': 'Kh', 'Ц': 'Ts', 'Ч': 'Ch', 'Ш': 'Sh', 'Щ': 'Shch',
         'Ъ': '', 'Ы': 'Y', 'Ь': '', 'Э': 'E', 'Ю': 'Yu', 'Я': 'Ya',
     }
-    
     result = ''
     for char in name:
         result += translit_map.get(char, char)
-    
-    # Заменяем пробелы и другие символы на дефисы
     result = re.sub(r'[^\w\s-]', '', result)
     result = re.sub(r'[-\s]+', '-', result)
     return result.strip('-').lower()
@@ -105,7 +97,6 @@ def index(request):
 
 def catalog(request):
     try:
-        # Получаем и очищаем параметры
         category_slug = clean_search_param(request.GET.get('category'))
         min_price = clean_price_param(request.GET.get('min_price'))
         max_price = clean_price_param(request.GET.get('max_price'))
@@ -114,7 +105,6 @@ def catalog(request):
         sort = request.GET.get('sort', '-created_at')
         page = request.GET.get('page', 1)
         
-        # Валидация page
         try:
             page = int(page)
             if page < 1:
@@ -122,15 +112,10 @@ def catalog(request):
         except (ValueError, TypeError):
             page = 1
         
-        # Базовый запрос
         stones = Stone.objects.filter(in_stock=True).select_related('category')
         
-        # Применяем фильтры
         if category_slug:
-            # Пробуем найти по slug
             stones = stones.filter(category__slug=category_slug)
-            
-            # Если ничего не найдено, пробуем найти по названию
             if not stones.exists():
                 stones = Stone.objects.filter(in_stock=True).select_related('category')
                 stones = stones.filter(category__name__icontains=category_slug)
@@ -145,7 +130,6 @@ def catalog(request):
             stones = stones.filter(hardness__gte=hardness)
         
         if search:
-            # Сложный поиск по нескольким полям
             stones = stones.filter(
                 Q(name__icontains=search) | 
                 Q(description__icontains=search) |
@@ -153,7 +137,6 @@ def catalog(request):
                 Q(characteristics__icontains=search)
             )
         
-        # Применяем сортировку
         if sort == 'price_asc':
             stones = stones.order_by('price_per_sqm')
         elif sort == 'price_desc':
@@ -175,23 +158,18 @@ def catalog(request):
         else:
             stones = stones.order_by('-created_at')
         
-        # Пагинация
         paginator = Paginator(stones, 12)
         
-        # Обработка случая, когда запрошенная страница больше максимальной
         if page > paginator.num_pages and paginator.num_pages > 0:
             page = paginator.num_pages
         
         page_obj = paginator.get_page(page)
         
-        # Создаем безопасные slug для каждого камня
         for stone in page_obj:
             stone.safe_slug = create_safe_slug(stone.name)
         
-        # Получаем все категории для фильтра
         categories = StoneCategory.objects.all().order_by('name')
         
-        # Формируем контекст
         context = {
             'page_obj': page_obj,
             'categories': categories,
@@ -214,10 +192,8 @@ def catalog(request):
 
 def stone_detail(request, slug):
     try:
-        # Пытаемся найти камень по slug
         stone = get_object_or_404(Stone, slug=slug, in_stock=True)
         
-        # Кэшируем похожие товары
         cache_key = f'similar_stones_{slug}'
         similar_stones = cache.get(cache_key)
         
@@ -260,7 +236,6 @@ def stone_detail(request, slug):
             form.fields['stone'].widget = forms.HiddenInput()
             form.fields['stone'].initial = stone.id
         
-        # Создаем безопасный slug для использования в шаблоне
         stone.safe_slug = create_safe_slug(stone.name)
         
         context = {
@@ -292,32 +267,25 @@ def order_success(request, order_id):
 def by_product(request):
     """Страница заказа товара"""
     try:
-        # Получаем параметры из GET запроса
         stone_slug = clean_search_param(request.GET.get('stone_slug'))
         stone_id = request.GET.get('stone')
         
         initial = {}
         
-        # Если передан slug, находим камень и подставляем его ID
         if stone_slug:
             try:
-                # Пробуем найти по оригинальному slug
                 stone = Stone.objects.filter(slug=stone_slug, in_stock=True).first()
-                
-                # Если не нашли, пробуем найти по имени
                 if not stone:
                     stones = Stone.objects.filter(in_stock=True)
                     for s in stones:
                         if create_safe_slug(s.name) == stone_slug:
                             stone = s
                             break
-                
                 if stone:
                     initial['stone'] = stone.id
                 else:
                     messages.error(request, 'Камень не найден')
                     return redirect('catalog')
-                    
             except Exception as e:
                 logger.error(f"Error finding stone by slug: {e}")
                 messages.error(request, 'Камень не найден')
@@ -325,7 +293,6 @@ def by_product(request):
         elif stone_id:
             initial['stone'] = stone_id
         
-        # Добавляем остальные параметры
         for param in ['length', 'width', 'thickness', 'edge_type']:
             value = request.GET.get(param)
             if value:
@@ -341,15 +308,6 @@ def by_product(request):
                 with transaction.atomic():
                     order = form.save()
                     
-                    # Применяем промокод из сессии
-                    promo = request.session.get('applied_promo')
-                    if promo:
-                        order.promo_code = promo['code']
-                        order.discount_amount = promo['discount']
-                        order.save()
-                        del request.session['applied_promo']
-                    
-                    # Отправка уведомления
                     try:
                         telegram = TelegramNotifier()
                         telegram.send_order_notification(order)
@@ -358,6 +316,12 @@ def by_product(request):
                     
                     messages.success(request, f'Спасибо, {order.customer_name}! Ваш заказ принят.')
                     return redirect('order_success', order_id=order.id)
+            else:
+                # Если форма не валидна, выводим ошибки
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field}: {error}")
+                return redirect('by_product')
         else:
             form = ProductForm(initial=initial)
         
@@ -375,7 +339,6 @@ def by_product(request):
 
 @login_required
 def questions(request):
-    """Страница отзывов и вопросов (только для авторизованных)"""
     try:
         if request.method == "POST":
             form = UserForm(request.POST, request.FILES)
@@ -402,7 +365,6 @@ def questions(request):
                         parent=parent
                     )
                     
-                    # Сохраняем с указанием пользователя для авто-модерации
                     feedback.save_with_user(request.user)
                     
                     try:
@@ -425,11 +387,10 @@ def questions(request):
         search_query = request.GET.get('search', '')
         page = int(request.GET.get('page', 1))
 
-        # Получаем все одобренные отзывы и ответы на них
         feedbacks = Feedback.objects.filter(
             moderation_status='approved',
             is_published=True,
-            parent__isnull=True  # Только родительские сообщения (не ответы)
+            parent__isnull=True
         ).select_related('user').prefetch_related(
             Prefetch('replies', queryset=Feedback.objects.filter(
                 moderation_status='approved', 
@@ -449,10 +410,8 @@ def questions(request):
                 Q(message__icontains=search_query)
             )
         
-        # Сортируем по дате
         feedbacks = feedbacks.order_by('-created_at')
         
-        # Статистика
         total_count = Feedback.objects.count()
         avg_result = Feedback.objects.filter(
             request_type='review',
@@ -465,7 +424,6 @@ def questions(request):
         paginator = Paginator(feedbacks, 10)
         page_obj = paginator.get_page(page)
 
-        # Для каждого отзыва проверяем, может ли пользователь его удалить
         for feedback in page_obj:
             feedback.can_delete_flag = feedback.can_delete(request.user)
             for reply in feedback.replies.all():
@@ -510,7 +468,6 @@ def about(request):
     return render(request, "about.html")
 
 def contact(request):
-    """Страница контактов"""
     try:
         if request.method == 'POST':
             form = ContactForm(request.POST)
@@ -519,14 +476,12 @@ def contact(request):
                 email = form.cleaned_data['email']
                 message = form.cleaned_data['message']
                 
-                # Сохраняем в базу данных
                 contact_message = ContactMessage.objects.create(
                     name=name,
                     email=email,
                     message=message
                 )
                 
-                # Отправляем уведомление на email администратора
                 try:
                     send_mail(
                         f'Новое сообщение от {name}',
@@ -538,7 +493,6 @@ def contact(request):
                 except Exception as e:
                     logger.error(f"Error sending email: {e}")
                 
-                # Отправляем уведомление в Telegram
                 try:
                     telegram = TelegramNotifier()
                     telegram.send_message(
@@ -553,7 +507,6 @@ def contact(request):
                 messages.success(request, 'Спасибо! Ваше сообщение отправлено. Мы свяжемся с вами в ближайшее время.')
                 return redirect('contact')
             else:
-                # Если форма не валидна, показываем ошибки
                 for field, errors in form.errors.items():
                     for error in errors:
                         messages.error(request, f"{field}: {error}")
@@ -568,12 +521,9 @@ def contact(request):
 
 @login_required
 def add_to_wishlist(request, stone_id):
-    """Добавление в избранное"""
     if request.method == 'POST':
         try:
             stone = Stone.objects.get(id=stone_id)
-            
-            # Проверяем есть ли уже
             exists = Wishlist.objects.filter(user=request.user, stone=stone).exists()
             
             if exists:
@@ -592,14 +542,11 @@ def add_to_wishlist(request, stone_id):
 
 @login_required
 def wishlist_view(request):
-    """Страница избранного"""
     try:
-        # Получаем все товары из избранного для текущего пользователя
         wishlist_items = Wishlist.objects.filter(
             user=request.user
         ).select_related('stone', 'stone__category')
         
-        # Создаем безопасные slug для каждого камня
         for item in wishlist_items:
             item.stone.safe_slug = create_safe_slug(item.stone.name)
         
@@ -626,23 +573,18 @@ def check_wishlist_status(request, stone_id):
         return JsonResponse({'in_wishlist': False})
 
 def add_to_comparison(request, stone_id):
-    """Добавление в сравнение"""
     if request.method == 'POST':
         try:
             stone = Stone.objects.get(id=stone_id)
             
-            # Создаем сессию если нет
             if not request.session.session_key:
                 request.session.create()
             
             session_key = request.session.session_key
-            
-            # Получаем или создаем сравнение
             comparison, created = Comparison.objects.get_or_create(
                 session_key=session_key
             )
             
-            # Проверяем есть ли уже
             if comparison.stones.filter(id=stone_id).exists():
                 comparison.stones.remove(stone)
                 return JsonResponse({
@@ -672,7 +614,6 @@ def add_to_comparison(request, stone_id):
     return JsonResponse({'success': False, 'error': 'Метод не поддерживается'})
 
 def comparison_view(request):
-    """Страница сравнения"""
     try:
         session_key = request.session.session_key
         stones = []
@@ -682,7 +623,6 @@ def comparison_view(request):
             if comparison:
                 stones = comparison.stones.all().select_related('category')
         
-        # Создаем безопасные slug для каждого камня
         for stone in stones:
             stone.safe_slug = create_safe_slug(stone.name)
         
@@ -728,7 +668,6 @@ def comparison_view(request):
         return render(request, 'comparison.html', {'stones': [], 'error': 'Ошибка загрузки сравнения'})
 
 def remove_from_comparison(request, stone_id):
-    """Удаление из сравнения"""
     if request.method == 'POST':
         try:
             session_key = request.session.session_key
@@ -788,7 +727,6 @@ def profile(request):
             user=user
         ).select_related('stone')[:5]
         
-        # Создаем безопасные slug для каждого камня в избранном
         for item in wishlist:
             item.stone.safe_slug = create_safe_slug(item.stone.name)
         
@@ -828,7 +766,6 @@ def profile_orders(request):
             customer_phone=request.user.phone
         ).select_related('stone').order_by('-created_at')
         
-        # Создаем безопасные slug для каждого камня в заказах
         for order in orders:
             order.stone.safe_slug = create_safe_slug(order.stone.name)
         
@@ -844,7 +781,6 @@ def profile_calculations(request):
             user=request.user
         ).select_related('stone').order_by('-created_at')
         
-        # Создаем безопасные slug для каждого камня в расчетах
         for calc in calculations:
             calc.stone.safe_slug = create_safe_slug(calc.stone.name)
         
@@ -883,18 +819,15 @@ def logout_view(request):
 @login_required
 @require_POST
 def delete_feedback(request, feedback_id):
-    """Удаление отзыва/вопроса"""
     try:
         feedback = get_object_or_404(Feedback, id=feedback_id)
         
-        # Проверяем права на удаление
         if not feedback.can_delete(request.user):
             return JsonResponse({
                 'success': False, 
                 'error': 'У вас нет прав на удаление этого отзыва'
             }, status=403)
         
-        # Если это родительский отзыв, удаляем все ответы на него
         if feedback.replies.exists():
             feedback.replies.all().delete()
         
@@ -910,7 +843,6 @@ def delete_feedback(request, feedback_id):
 @login_required
 @require_POST
 def reply_to_feedback(request, feedback_id):
-    """Ответ на отзыв/вопрос"""
     try:
         parent = get_object_or_404(Feedback, id=feedback_id)
         
@@ -920,20 +852,17 @@ def reply_to_feedback(request, feedback_id):
         if not message:
             return JsonResponse({'success': False, 'error': 'Сообщение не может быть пустым'})
         
-        # Создаем ответ
         reply = Feedback(
             request_type=parent.request_type,
             name=request.user.get_full_name() or request.user.username,
             numTel=request.user.phone or '',
             message=message,
             parent=parent,
-            rating=None  # У ответов нет рейтинга
+            rating=None
         )
         
-        # Сохраняем с указанием пользователя для авто-модерации
         reply.save_with_user(request.user)
         
-        # Отправляем уведомление автору оригинального отзыва (если есть email)
         if parent.user and parent.user.email:
             try:
                 send_mail(

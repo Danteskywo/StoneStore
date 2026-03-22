@@ -23,50 +23,40 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('__debug__/', include('debug_toolbar.urls')),
     
-    # ===== ВСЕ API И AJAX ПУТИ ДОЛЖНЫ БЫТЬ ЗДЕСЬ, ВНЕ i18n_patterns =====
-    # API для калькулятора
+    # ===== ВСЕ API И AJAX ПУТИ =====
     path('api/calculate-price/', calc_views.api_calculate_price, name='api_calculate'),
     path('api/save-calculation/', calc_views.api_save_calculation, name='api_save_calculation'),
     path('my-calculations/', calc_views.saved_calculations, name='saved_calculations'),
     
-    # API для поиска
     path('api/search/suggest/', search_views.api_search_suggest, name='api_search_suggest'),
     path('api/search/', search_views.api_search, name='api_search'),
     path('search/', search_views.search_page, name='search'),
     
-    # API для избранного (wishlist)
     path('wishlist/add/<int:stone_id>/', stone_views.add_to_wishlist, name='add_to_wishlist'),
     path('api/wishlist/check/<int:stone_id>/', stone_views.check_wishlist_status, name='check_wishlist'),
     
-    # API для сравнения (comparison)
     path('compare/add/<int:stone_id>/', stone_views.add_to_comparison, name='add_to_comparison'),
     path('compare/remove/<int:stone_id>/', stone_views.remove_from_comparison, name='remove_from_comparison'),
     
-    # API для чата
     path('chat/send/', chat_views.send_message, name='chat_send'),
     path('chat/messages/', chat_views.get_messages, name='chat_messages'),
     path('chat/close/', chat_views.close_chat, name='chat_close'),
     path('chat/check-operator/', chat_views.check_operator, name='chat_check'),
     
-    # API для подписки
     path('newsletter/subscribe/', newsletter_views.subscribe, name='subscribe'),
     path('newsletter/unsubscribe/', newsletter_views.unsubscribe, name='unsubscribe'),
     path('newsletter/track/open/<int:tracking_id>/', newsletter_views.track_open, name='track_open'),
     path('newsletter/track/click/<int:tracking_id>/<int:link_id>/', newsletter_views.track_click, name='track_click'),
     
-    # API для промокодов
     path('discounts/apply/', discount_views.apply_promo, name='apply_promo'),
     path('discounts/remove/', discount_views.remove_promo, name='remove_promo'),
     
-    # API для 3D просмотра
     path('3d-viewer/', three_d_views.viewer_3d, name='3d_viewer'),
     path('3d-viewer/<int:stone_id>/', three_d_views.viewer_3d, name='3d_viewer_with_stone'),
     
-    # API для калькулятора (дополнительные)
     path('api/get-calculation/<int:calc_id>/', calc_views.api_get_calculation, name='api_get_calculation'),
     path('api/delete-calculation/<int:calc_id>/', calc_views.api_delete_calculation, name='api_delete_calculation'),
     
-    # API для отзывов (НОВЫЕ)
     path('feedback/delete/<int:feedback_id>/', stone_views.delete_feedback, name='delete_feedback'),
     path('feedback/reply/<int:feedback_id>/', stone_views.reply_to_feedback, name='reply_feedback'),
 ]
@@ -95,10 +85,10 @@ urlpatterns += i18n_patterns(
     path('about/', stone_views.about, name='about'),
     path('contact/', stone_views.contact, name='contact'),
     
-    # Избранное (только страница, не API)
+    # Избранное
     path('wishlist/', stone_views.wishlist_view, name='wishlist'),
     
-    # Сравнение (только страница, не API)
+    # Сравнение
     path('compare/', stone_views.comparison_view, name='comparison'),
     
     # Регистрация и профиль

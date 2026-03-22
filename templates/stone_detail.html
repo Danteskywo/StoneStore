@@ -39,7 +39,7 @@
             <div class="stone-characteristics">
                 <h3 data-i18n="Характеристики">Характеристики</h3>
                 <table class="chars-table">
-                    <tr>
+                     <tr>
                         <td data-i18n="Твердость:">Твердость:</td>
                         <td>{{ stone.hardness }}/10</td>
                     </tr>
@@ -73,13 +73,115 @@
                 </button>
             </div>
 
-            <div class="order-form-section">
-                <h3 data-i18n="Быстрый заказ">Быстрый заказ</h3>
-                <form method="post" class="simple-order-form">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn-order" data-i18n="Заказать">Заказать</button>
-                </form>
+            <!-- Калькулятор -->
+            <div class="calculator-section">
+                <h3 data-i18n="Калькулятор стоимости">📐 Калькулятор стоимости</h3>
+                
+                <div class="calc-param">
+                    <label data-i18n="Длина (м):">Длина (м):</label>
+                    <input type="number" id="calc-length" step="0.1" min="0.5" max="5" value="2.0">
+                </div>
+                
+                <div class="calc-param">
+                    <label data-i18n="Ширина (м):">Ширина (м):</label>
+                    <input type="number" id="calc-width" step="0.1" min="0.5" max="3" value="0.6">
+                </div>
+                
+                <div class="calc-param">
+                    <label data-i18n="Толщина (мм):">Толщина (мм):</label>
+                    <div class="param-options" id="thickness-options">
+                        <div class="param-option">
+                            <input type="radio" name="thickness" id="thick-20" value="20">
+                            <label for="thick-20">20 мм</label>
+                        </div>
+                        <div class="param-option">
+                            <input type="radio" name="thickness" id="thick-30" value="30" checked>
+                            <label for="thick-30">30 мм (+0%)</label>
+                        </div>
+                        <div class="param-option">
+                            <input type="radio" name="thickness" id="thick-40" value="40">
+                            <label for="thick-40">40 мм (+20%)</label>
+                        </div>
+                        <div class="param-option">
+                            <input type="radio" name="thickness" id="thick-50" value="50">
+                            <label for="thick-50">50 мм (+40%)</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="calc-param">
+                    <label data-i18n="Тип кромки:">Тип кромки:</label>
+                    <div class="param-options">
+                        <div class="param-option">
+                            <input type="radio" name="edge_type" id="edge-straight" value="straight" checked>
+                            <label for="edge-straight">Прямой</label>
+                        </div>
+                        <div class="param-option">
+                            <input type="radio" name="edge_type" id="edge-rounded" value="rounded">
+                            <label for="edge-rounded">Закругленный (+500 ₽/м.п.)</label>
+                        </div>
+                        <div class="param-option">
+                            <input type="radio" name="edge_type" id="edge-bevel" value="bevel">
+                            <label for="edge-bevel">Скос (+800 ₽/м.п.)</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="calc-param">
+                    <label data-i18n="Опции:">Опции:</label>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="has-sink">
+                        <label for="has-sink">🚰 Вырез под мойку (+{{ stone.sink_cutout_price|default:3000 }} ₽)</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="has-hob">
+                        <label for="has-hob">🔥 Вырез под варочную панель (+{{ stone.hob_cutout_price|default:2500 }} ₽)</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="need-install">
+                        <label for="need-install">🔧 Монтаж и установка (+{{ stone.installation_price_per_m|default:1500 }} ₽/м.п.)</label>
+                    </div>
+                </div>
+                
+                <div class="calc-result">
+                    <h4 data-i18n="Примерная стоимость">Примерная стоимость</h4>
+                    <div class="calc-total" id="total-price">0 ₽</div>
+                    <div class="calc-details" id="price-details" style="display:none;">
+                        <div class="detail-row">
+                            <span>Камень:</span>
+                            <span id="detail-stone">0 ₽</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>Толщина (надбавка):</span>
+                            <span id="detail-thickness">0 ₽</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>Раскрой:</span>
+                            <span id="detail-cutting">0 ₽</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>Обработка кромки:</span>
+                            <span id="detail-edge">0 ₽</span>
+                        </div>
+                        <div class="detail-row" id="detail-sink-row" style="display:none;">
+                            <span>Вырез под мойку:</span>
+                            <span id="detail-sink">0 ₽</span>
+                        </div>
+                        <div class="detail-row" id="detail-hob-row" style="display:none;">
+                            <span>Вырез под плиту:</span>
+                            <span id="detail-hob">0 ₽</span>
+                        </div>
+                        <div class="detail-row" id="detail-install-row" style="display:none;">
+                            <span>Монтаж:</span>
+                            <span id="detail-install">0 ₽</span>
+                        </div>
+                    </div>
+                    <button class="btn-calc" id="toggle-details">Показать детали ▼</button>
+                </div>
+                
+                <button class="btn-order-redirect" id="order-with-params">
+                    🛒 Перейти к оформлению заказа
+                </button>
             </div>
         </div>
     </div>
@@ -265,42 +367,151 @@
     color: white;
 }
 
-.order-form-section {
+.calculator-section {
+    margin-top: 30px;
+    padding: 20px;
     background: #f8f9fa;
     border-radius: 15px;
-    padding: 25px;
-    margin-top: 30px;
 }
 
-.order-form-section h3 {
-    margin-bottom: 20px;
+.calculator-section h3 {
+    margin-bottom: 15px;
+    font-size: 1.3rem;
 }
 
-.simple-order-form input,
-.simple-order-form select,
-.simple-order-form textarea {
+.calc-param {
+    margin-bottom: 15px;
+}
+
+.calc-param label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.calc-param input[type="number"],
+.calc-param select {
     width: 100%;
     padding: 10px;
-    margin-bottom: 15px;
     border: 2px solid #dee2e6;
     border-radius: 8px;
+    font-size: 1rem;
 }
 
-.btn-order {
+.param-options {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.param-option {
+    flex: 1;
+}
+
+.param-option input {
+    display: none;
+}
+
+.param-option label {
+    display: block;
+    padding: 10px;
+    background: white;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    margin: 0;
+}
+
+.param-option input:checked + label {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.checkbox-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.checkbox-option input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.checkbox-option label {
+    margin: 0;
+    cursor: pointer;
+}
+
+.calc-result {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.calc-total {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.calc-details {
+    margin-top: 15px;
+    text-align: left;
+    border-top: 1px solid #dee2e6;
+    padding-top: 15px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+}
+
+.btn-calc {
     width: 100%;
-    padding: 15px;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    padding: 10px;
+    background: var(--primary);
     color: white;
     border: none;
     border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+.btn-calc:hover {
+    background: var(--primary-light);
+}
+
+.btn-order-redirect {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
+    margin-top: 15px;
 }
 
-.btn-order:hover {
+.btn-order-redirect:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 5px 15px rgba(40,167,69,0.3);
+}
+
+.similar-products {
+    margin-top: 60px;
 }
 
 .similar-products h2 {
@@ -373,7 +584,12 @@
     .stone-gallery {
         position: static;
     }
+    
+    .param-options {
+        flex-direction: column;
+    }
 }
+
 @keyframes slideIn {
     from {
         transform: translateX(100%);
@@ -396,13 +612,116 @@
 </style>
 
 <script>
+// Данные камня
+const pricePerSqm = parseFloat("{{ stone.price_per_sqm|default:'0' }}");
+const sinkPrice = parseFloat("{{ stone.sink_cutout_price|default:'3000' }}");
+const hobPrice = parseFloat("{{ stone.hob_cutout_price|default:'2500' }}");
+const installPricePerM = parseFloat("{{ stone.installation_price_per_m|default:'1500' }}");
+
+// Коэффициенты толщины
+const thicknessMultiplier = {
+    20: 1.0,
+    30: 1.0,
+    40: 1.2,
+    50: 1.4
+};
+
+// Цены кромки
+const edgePriceMap = {
+    'straight': 0,
+    'rounded': 500,
+    'bevel': 800
+};
+
+function calculatePrice() {
+    const length = parseFloat(document.getElementById('calc-length').value) || 0;
+    const width = parseFloat(document.getElementById('calc-width').value) || 0;
+    const thickness = parseInt(document.querySelector('input[name="thickness"]:checked')?.value || 30);
+    const edgeType = document.querySelector('input[name="edge_type"]:checked')?.value || 'straight';
+    const hasSink = document.getElementById('has-sink').checked;
+    const hasHob = document.getElementById('has-hob').checked;
+    const needInstall = document.getElementById('need-install').checked;
+    
+    const area = length * width;
+    const perimeter = 2 * (length + width);
+    
+    const multiplier = thicknessMultiplier[thickness] || 1.0;
+    const stonePrice = area * pricePerSqm * multiplier;
+    const thicknessExtra = stonePrice - (area * pricePerSqm);
+    const edgePrice = perimeter * edgePriceMap[edgeType];
+    const cuttingPrice = perimeter * 500;
+    const sinkPriceTotal = hasSink ? sinkPrice : 0;
+    const hobPriceTotal = hasHob ? hobPrice : 0;
+    const installPrice = needInstall ? perimeter * installPricePerM : 0;
+    
+    const total = stonePrice + cuttingPrice + edgePrice + sinkPriceTotal + hobPriceTotal + installPrice;
+    
+    document.getElementById('total-price').innerHTML = Math.round(total).toLocaleString() + ' ₽';
+    document.getElementById('detail-stone').innerHTML = Math.round(stonePrice).toLocaleString() + ' ₽';
+    document.getElementById('detail-thickness').innerHTML = Math.round(thicknessExtra).toLocaleString() + ' ₽';
+    document.getElementById('detail-cutting').innerHTML = Math.round(cuttingPrice).toLocaleString() + ' ₽';
+    document.getElementById('detail-edge').innerHTML = Math.round(edgePrice).toLocaleString() + ' ₽';
+    document.getElementById('detail-sink').innerHTML = Math.round(sinkPriceTotal).toLocaleString() + ' ₽';
+    document.getElementById('detail-hob').innerHTML = Math.round(hobPriceTotal).toLocaleString() + ' ₽';
+    document.getElementById('detail-install').innerHTML = Math.round(installPrice).toLocaleString() + ' ₽';
+    
+    document.getElementById('detail-sink-row').style.display = hasSink ? 'flex' : 'none';
+    document.getElementById('detail-hob-row').style.display = hasHob ? 'flex' : 'none';
+    document.getElementById('detail-install-row').style.display = needInstall ? 'flex' : 'none';
+}
+
+// Добавляем обработчики
+document.getElementById('calc-length')?.addEventListener('input', calculatePrice);
+document.getElementById('calc-width')?.addEventListener('input', calculatePrice);
+document.querySelectorAll('input[name="thickness"]').forEach(radio => radio.addEventListener('change', calculatePrice));
+document.querySelectorAll('input[name="edge_type"]').forEach(radio => radio.addEventListener('change', calculatePrice));
+document.getElementById('has-sink')?.addEventListener('change', calculatePrice);
+document.getElementById('has-hob')?.addEventListener('change', calculatePrice);
+document.getElementById('need-install')?.addEventListener('change', calculatePrice);
+calculatePrice();
+
+// Переключение деталей
+document.getElementById('toggle-details')?.addEventListener('click', function() {
+    const details = document.getElementById('price-details');
+    if (details.style.display === 'none' || details.style.display === '') {
+        details.style.display = 'block';
+        this.textContent = 'Скрыть детали ▲';
+    } else {
+        details.style.display = 'none';
+        this.textContent = 'Показать детали ▼';
+    }
+});
+
+// Переход на страницу заказа
+document.getElementById('order-with-params')?.addEventListener('click', function() {
+    const length = document.getElementById('calc-length').value;
+    const width = document.getElementById('calc-width').value;
+    const thickness = document.querySelector('input[name="thickness"]:checked')?.value || 30;
+    const edge_type = document.querySelector('input[name="edge_type"]:checked')?.value || 'straight';
+    const has_sink = document.getElementById('has-sink').checked ? '1' : '0';
+    const has_hob = document.getElementById('has-hob').checked ? '1' : '0';
+    const need_install = document.getElementById('need-install').checked ? '1' : '0';
+    
+    const params = new URLSearchParams({
+        stone: {{ stone.id }},
+        length: length,
+        width: width,
+        thickness: thickness,
+        edge_type: edge_type,
+        has_sink: has_sink,
+        has_hob: has_hob,
+        need_install: need_install
+    });
+    
+    window.location.href = `/order/?${params.toString()}`;
+});
+
+// Красивые уведомления
 function showNotification(message, type) {
-    // Создаем элемент уведомления
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.textContent = message;
     
-    // Стили для уведомления
     notification.style.cssText = `
         position: fixed;
         top: 20px;
@@ -417,15 +736,14 @@ function showNotification(message, type) {
         animation: slideIn 0.3s ease, fadeOut 0.3s ease 1.7s forwards;
     `;
     
-    // Добавляем на страницу
     document.body.appendChild(notification);
     
-    // Удаляем через 2 секунды
     setTimeout(() => {
         notification.remove();
     }, 2000);
 }
 
+// Избранное
 function toggleWishlist(btn) {
     {% if user.is_authenticated %}
         const stoneId = btn.dataset.stoneId;
@@ -463,6 +781,7 @@ function toggleWishlist(btn) {
     {% endif %}
 }
 
+// Сравнение
 function addToCompare(stoneId) {
     const csrfToken = '{{ csrf_token }}';
     

@@ -37,17 +37,14 @@ class PhoneField(forms.CharField):
         if not value:
             return value
             
-        # Очищаем от лишних символов
         digits = re.sub(r'\D', '', value)
         
-        # Проверка формата
         if not value.startswith('+7') and not value.startswith('8'):
             raise forms.ValidationError('Номер должен начинаться с +7 или 8')
         
         if len(digits) != 11:
             raise forms.ValidationError('Номер должен содержать 11 цифр')
         
-        # Приводим к единому формату
         if digits.startswith('8'):
             digits = '7' + digits[1:]
         formatted = f"+7 ({digits[1:4]}) {digits[4:7]}-{digits[7:9]}-{digits[9:11]}"
@@ -155,7 +152,6 @@ class UserForm(forms.Form):
         langs = cleaned_data.get('langs')
         rating = cleaned_data.get('rating')
         
-        # Для отзывов оценка обязательна
         if langs == 'review' and not rating:
             self.add_error('rating', 'Для отзыва необходимо указать оценку')
         
@@ -236,7 +232,6 @@ class ProductForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Добавляем цену к опциям выбора камня
         if 'stone' in self.fields:
             self.fields['stone'].queryset = Stone.objects.filter(in_stock=True)
             self.fields['stone'].label_from_instance = lambda obj: f"{obj.name} - {obj.price_per_sqm} ₽/м²"

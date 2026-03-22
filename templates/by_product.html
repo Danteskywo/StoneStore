@@ -3,360 +3,586 @@
 
 {% block title %}Заказать столешницу - StoneStore{% endblock %}
 
+{% block extra_css %}
+<style>
+    .order-page {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+    
+    .order-header {
+        text-align: center;
+        margin-bottom: 80px;
+    }
+    
+    .order-header h1 {
+        font-size: 5rem;
+        background: linear-gradient(135deg, #4361ee 0%, #f72585 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 20px;
+    }
+    
+    .order-header p {
+        color: #6c757d;
+        font-size: 2.2rem;
+    }
+    
+    .order-content {
+        display: grid;
+        grid-template-columns: 1fr 450px;
+        gap: 60px;
+    }
+    
+    .order-form-container {
+        background: white;
+        border-radius: 40px;
+        padding: 50px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .order-info {
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+    }
+    
+    .info-card {
+        background: white;
+        border-radius: 40px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .info-card h3 {
+        margin-bottom: 30px;
+        color: #4361ee;
+        font-size: 2.4rem;
+    }
+    
+    .info-card ul, .info-card ol {
+        padding-left: 35px;
+    }
+    
+    .info-card li {
+        margin-bottom: 18px;
+        color: #495057;
+        font-size: 1.6rem;
+        line-height: 1.4;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 35px;
+    }
+    
+    .form-group {
+        margin-bottom: 35px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 15px;
+        font-weight: 700;
+        color: #212529;
+        font-size: 1.6rem;
+    }
+    
+    .form-group input, 
+    .form-group select, 
+    .form-group textarea {
+        width: 100%;
+        padding: 20px 25px;
+        border: 3px solid #dee2e6;
+        border-radius: 16px;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-group input:focus, 
+    .form-group select:focus, 
+    .form-group textarea:focus {
+        border-color: #f72585;
+        outline: none;
+        box-shadow: 0 0 0 5px rgba(247, 37, 133, 0.2);
+    }
+    
+    .phone-input {
+        letter-spacing: 1px;
+    }
+    
+    .address-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+        gap: 25px;
+    }
+    
+    .address-header label {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #212529;
+    }
+    
+    .address-switch-buttons {
+        display: flex;
+        gap: 30px;
+    }
+    
+    .switch-btn {
+        padding: 20px 40px !important;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+        border: none !important;
+        border-radius: 60px !important;
+        cursor: pointer !important;
+        font-size: 1.6rem !important;
+        font-weight: 700 !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1) !important;
+        color: #212529 !important;
+    }
+    
+    .switch-btn.active {
+        background: linear-gradient(135deg, #4361ee 0%, #4895ef 100%) !important;
+        color: white !important;
+    }
+    
+    .map-container {
+        width: 100%;
+        height: 550px;
+        border-radius: 24px;
+        overflow: hidden;
+        border: 3px solid #dee2e6;
+        margin-bottom: 30px;
+    }
+    
+    .map-container iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+    
+    .get-location-btn {
+        width: 100%;
+        padding: 20px 30px !important;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 60px !important;
+        font-size: 1.6rem !important;
+        font-weight: 700 !important;
+        cursor: pointer !important;
+        margin: 20px 0 !important;
+    }
+    
+    .success-badge {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 60px;
+        margin: 15px 0;
+        font-size: 1.3rem;
+        display: none;
+        text-align: center;
+    }
+    
+    .success-badge.show {
+        display: block;
+    }
+    
+    .map-note {
+        font-size: 1.3rem;
+        color: #6c757d;
+        text-align: center;
+        background: #e9ecef;
+        padding: 15px;
+        border-radius: 20px;
+    }
+    
+    .price-summary {
+        margin-top: 35px;
+        padding: 35px;
+        background: #f8f9fa;
+        border-radius: 24px;
+    }
+    
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 18px 0;
+        border-bottom: 2px solid #dee2e6;
+        font-size: 1.6rem;
+    }
+    
+    .summary-row.total {
+        font-size: 2.4rem;
+        font-weight: 800;
+        color: #4361ee;
+        border-bottom: none;
+        margin-top: 18px;
+    }
+    
+    .btn-submit {
+        width: 100%;
+        padding: 24px;
+        background: linear-gradient(135deg, #4361ee 0%, #4895ef 100%);
+        color: white;
+        border: none;
+        border-radius: 60px;
+        font-size: 1.8rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 35px;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(67, 97, 238, 0.3);
+    }
+    
+    .error-message {
+        color: #ef233c;
+        font-size: 1.3rem;
+        margin-top: 12px;
+        padding: 15px;
+        background: #ffe6e6;
+        border-radius: 16px;
+        display: none;
+    }
+    
+    .error-message.show {
+        display: block;
+    }
+    
+    @media (max-width: 1200px) {
+        .order-content {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .address-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .switch-btn {
+            padding: 12px 24px !important;
+            font-size: 1.2rem !important;
+        }
+        
+        .map-container {
+            height: 400px;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="order-page">
     <div class="order-header">
-        <h1 data-i18n="Заказать столешницу">Заказать столешницу</h1>
-        <p data-i18n="Заполните форму и мы свяжемся с вами для уточнения деталей">Заполните форму и мы свяжемся с вами для уточнения деталей</p>
+        <h1>Заказать столешницу</h1>
+        <p>Заполните форму и мы свяжемся с вами для уточнения деталей</p>
     </div>
 
     <div class="order-content">
         <div class="order-form-container">
-            <form method="post" class="order-form">
+            <form method="post" class="order-form" id="orderForm" action="{% url 'by_product' %}">
                 {% csrf_token %}
                 
-                {% if form.non_field_errors %}
-                <div class="form-errors">
-                    {% for error in form.non_field_errors %}
-                        <p class="error">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                {% endif %}
-
+                <div id="formErrors" class="error-message"></div>
+                
                 <div class="form-group">
-                    <label for="{{ form.customer_name.id_for_label }}" data-i18n="{{ form.customer_name.label }}">{{ form.customer_name.label }}</label>
-                    {{ form.customer_name }}
-                    {% if form.customer_name.errors %}
-                    <p class="error">{{ form.customer_name.errors.0 }}</p>
-                    {% endif %}
+                    <label for="id_customer_name">Ваше имя *</label>
+                    <input type="text" name="customer_name" id="id_customer_name" required class="address-field" placeholder="Иванов Иван Иванович">
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="{{ form.customer_phone.id_for_label }}" data-i18n="{{ form.customer_phone.label }}">{{ form.customer_phone.label }}</label>
-                        {{ form.customer_phone }}
-                        {% if form.customer_phone.errors %}
-                        <p class="error">{{ form.customer_phone.errors.0 }}</p>
-                        {% endif %}
+                        <label for="id_customer_phone">Телефон *</label>
+                        <input type="tel" name="customer_phone" id="id_customer_phone" required class="address-field phone-input" placeholder="+7 (___) ___-__-__" maxlength="18">
                     </div>
 
                     <div class="form-group">
-                        <label for="{{ form.customer_email.id_for_label }}" data-i18n="{{ form.customer_email.label }}">{{ form.customer_email.label }}</label>
-                        {{ form.customer_email }}
-                        {% if form.customer_email.errors %}
-                        <p class="error">{{ form.customer_email.errors.0 }}</p>
-                        {% endif %}
+                        <label for="id_customer_email">Email</label>
+                        <input type="email" name="customer_email" id="id_customer_email" class="address-field" placeholder="email@example.com">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="{{ form.customer_address.id_for_label }}" data-i18n="{{ form.customer_address.label }}">{{ form.customer_address.label }}</label>
-                    {{ form.customer_address }}
-                    {% if form.customer_address.errors %}
-                    <p class="error">{{ form.customer_address.errors.0 }}</p>
-                    {% endif %}
+                    <div class="address-header">
+                        <label>📍 Адрес доставки *</label>
+                        <div class="address-switch-buttons">
+                            <button type="button" class="switch-btn active" id="btnManual">✍️ Ручной ввод</button>
+                            <button type="button" class="switch-btn" id="btnMap">🗺️ Выбрать на карте</button>
+                        </div>
+                    </div>
+                    
+                    <div id="manualMode">
+                        <input type="text" 
+                               name="customer_address" 
+                               id="id_customer_address"
+                               required
+                               class="address-field"
+                               placeholder="г. Москва, ул. Примерная, д. 1, кв. 1">
+                    </div>
+                    
+                    <div id="mapMode" style="display: none;">
+                        <div class="map-container">
+                            <iframe 
+                                id="yandexMap"
+                                src="https://yandex.ru/map-widget/v1/?um=constructor%3A1&source=constructor"
+                                allowfullscreen="true">
+                            </iframe>
+                        </div>
+                        <button type="button" class="get-location-btn" id="getLocationBtn">📍 Моя текущая геолокация</button>
+                        <div id="successBadge" class="success-badge">✅ Координаты вставлены в поле адреса</div>
+                        <div class="map-note">💡 Нажмите на зеленую кнопку, чтобы определить ваше местоположение<br>📍 Координаты автоматически вставятся в поле адреса</div>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="{{ form.stone.id_for_label }}" data-i18n="{{ form.stone.label }}">{{ form.stone.label }}</label>
-                    {{ form.stone }}
-                    {% if form.stone.errors %}
-                    <p class="error">{{ form.stone.errors.0 }}</p>
-                    {% endif %}
+                    <label for="id_stone">Выберите камень *</label>
+                    <select name="stone" id="id_stone" required class="address-field">
+                        <option value="">---------</option>
+                        {% for stone in stones %}
+                        <option value="{{ stone.id }}" data-price="{{ stone.price_per_sqm }}">{{ stone.name }} - {{ stone.price_per_sqm }} ₽/м²</option>
+                        {% endfor %}
+                    </select>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="{{ form.length.id_for_label }}" data-i18n="{{ form.length.label }}">{{ form.length.label }}</label>
-                        {{ form.length }}
-                        {% if form.length.errors %}
-                        <p class="error">{{ form.length.errors.0 }}</p>
-                        {% endif %}
+                        <label for="id_length">Длина (м) *</label>
+                        <input type="number" name="length" id="id_length" required class="address-field" step="0.01" min="0.5" max="5" placeholder="2.0" value="2.0">
                     </div>
-
                     <div class="form-group">
-                        <label for="{{ form.width.id_for_label }}" data-i18n="{{ form.width.label }}">{{ form.width.label }}</label>
-                        {{ form.width }}
-                        {% if form.width.errors %}
-                        <p class="error">{{ form.width.errors.0 }}</p>
-                        {% endif %}
+                        <label for="id_width">Ширина (м) *</label>
+                        <input type="number" name="width" id="id_width" required class="address-field" step="0.01" min="0.5" max="3" placeholder="0.6" value="0.6">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="{{ form.thickness.id_for_label }}" data-i18n="{{ form.thickness.label }}">{{ form.thickness.label }}</label>
-                    {{ form.thickness }}
-                    {% if form.thickness.errors %}
-                    <p class="error">{{ form.thickness.errors.0 }}</p>
-                    {% endif %}
+                    <label for="id_thickness">Толщина (мм) *</label>
+                    <select name="thickness" id="id_thickness" required class="address-field">
+                        <option value="20">20 мм</option>
+                        <option value="30" selected>30 мм</option>
+                        <option value="40">40 мм</option>
+                        <option value="50">50 мм</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="{{ form.edge_type.id_for_label }}" data-i18n="{{ form.edge_type.label }}">{{ form.edge_type.label }}</label>
-                    {{ form.edge_type }}
-                    {% if form.edge_type.errors %}
-                    <p class="error">{{ form.edge_type.errors.0 }}</p>
-                    {% endif %}
+                    <label for="id_edge_type">Тип кромки</label>
+                    <select name="edge_type" id="id_edge_type" class="address-field">
+                        <option value="straight">Прямой</option>
+                        <option value="rounded">Закругленный</option>
+                        <option value="bevel">Скос</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="{{ form.sink_type.id_for_label }}" data-i18n="{{ form.sink_type.label }}">{{ form.sink_type.label }}</label>
-                    {{ form.sink_type }}
-                    {% if form.sink_type.errors %}
-                    <p class="error">{{ form.sink_type.errors.0 }}</p>
-                    {% endif %}
+                    <label for="id_sink_type">Тип мойки</label>
+                    <select name="sink_type" id="id_sink_type" class="address-field">
+                        <option value="none">Без мойки</option>
+                        <option value="undermount">Врезная</option>
+                        <option value="integrated">Интегрированная</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="{{ form.cutouts.id_for_label }}" data-i18n="{{ form.cutouts.label }}">{{ form.cutouts.label }}</label>
-                    {{ form.cutouts }}
-                    {% if form.cutouts.errors %}
-                    <p class="error">{{ form.cutouts.errors.0 }}</p>
-                    {% endif %}
+                    <label for="id_cutouts">Вырезы</label>
+                    <textarea name="cutouts" id="id_cutouts" class="address-field" rows="3" placeholder="Опишите необходимые вырезы под мойку, плиту и т.д."></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="{{ form.comment.id_for_label }}" data-i18n="{{ form.comment.label }}">{{ form.comment.label }}</label>
-                    {{ form.comment }}
-                    {% if form.comment.errors %}
-                    <p class="error">{{ form.comment.errors.0 }}</p>
-                    {% endif %}
-                </div>
-
-                <div class="promo-block">
-                    <h3 data-i18n="🎟️ Промокод">🎟️ Промокод</h3>
-                    <div class="promo-form" id="promoForm">
-                        <input type="text" id="promoCode" data-i18n-placeholder="Введите промокод" placeholder="Введите промокод" class="form-control">
-                        <button type="button" class="btn-promo" onclick="applyPromo()" data-i18n="Применить">Применить</button>
-                    </div>
-                    <div class="promo-applied" id="promoApplied" style="display: none;">
-                        <span class="applied-code"><span data-i18n="✓ Промокод">✓ Промокод</span> <span id="appliedCode"></span> <span data-i18n="применен">применен</span></span>
-                        <button class="remove-promo" onclick="removePromo()">✕</button>
-                    </div>
-                    <div class="promo-message" id="promoMessage"></div>
+                    <label for="id_comment">Комментарий</label>
+                    <textarea name="comment" id="id_comment" class="address-field" rows="3" placeholder="Дополнительные пожелания по заказу"></textarea>
                 </div>
 
                 <div class="price-summary">
-                    <div class="summary-row">
-                        <span data-i18n="Стоимость:">Стоимость:</span>
-                        <span id="originalPrice">0 <span data-i18n="₽">₽</span></span>
-                    </div>
-                    <div class="summary-row discount-row" id="discountRow" style="display: none;">
-                        <span data-i18n="Скидка:">Скидка:</span>
-                        <span id="discountAmount">-0 <span data-i18n="₽">₽</span></span>
-                    </div>
-                    <div class="summary-row total">
-                        <span data-i18n="Итого:">Итого:</span>
-                        <span id="finalPrice">0 <span data-i18n="₽">₽</span></span>
-                    </div>
+                    <div class="summary-row"><span>Стоимость:</span><span id="originalPrice">0 ₽</span></div>
+                    <div class="summary-row total"><span>Итого:</span><span id="finalPrice">0 ₽</span></div>
                 </div>
 
-                <button type="submit" class="btn-submit" data-i18n="Отправить заказ">Отправить заказ</button>
+                <button type="submit" class="btn-submit">✅ Отправить заказ</button>
             </form>
         </div>
 
         <div class="order-info">
-            <div class="info-card">
-                <h3 data-i18n="Почему стоит заказать у нас?">Почему стоит заказать у нас?</h3>
-                <ul>
-                    <li data-i18n="✓ Натуральный камень высшего качества">✓ Натуральный камень высшего качества</li>
-                    <li data-i18n="✓ Современное оборудование с ЧПУ">✓ Современное оборудование с ЧПУ</li>
-                    <li data-i18n="✓ Опытные мастера">✓ Опытные мастера</li>
-                    <li data-i18n="✓ Бесплатный замер">✓ Бесплатный замер</li>
-                    <li data-i18n="✓ Доставка и монтаж">✓ Доставка и монтаж</li>
-                    <li data-i18n="✓ Гарантия 5 лет">✓ Гарантия 5 лет</li>
-                </ul>
-            </div>
-            <div class="info-card">
-                <h3 data-i18n="Этапы работы">Этапы работы</h3>
-                <ol>
-                    <li data-i18n="Заявка на сайте">Заявка на сайте</li>
-                    <li data-i18n="Выезд замерщика">Выезд замерщика</li>
-                    <li data-i18n="Расчет стоимости">Расчет стоимости</li>
-                    <li data-i18n="Производство">Производство</li>
-                    <li data-i18n="Доставка и монтаж">Доставка и монтаж</li>
-                </ol>
-            </div>
-            <div class="info-card">
-                <h3 data-i18n="Контакты">Контакты</h3>
-                <p><span data-i18n="📞">📞</span> <span data-i18n="+7 (928) 720-78-77">+7 (928) 720-78-77</span></p>
-                <p><span data-i18n="✉️">✉️</span> <span data-i18n="skywo@mail.ru">skywo@mail.ru</span></p>
-                <p><span data-i18n="📍">📍</span> <span data-i18n="Нальчик, ул. Каменная, 15">Нальчик, ул. Каменная, 15</span></p>
-            </div>
+            <div class="info-card"><h3>💎 Почему стоит заказать у нас?</h3><ul><li>✓ Натуральный камень высшего качества</li><li>✓ Современное оборудование с ЧПУ</li><li>✓ Опытные мастера</li><li>✓ Бесплатный замер</li><li>✓ Доставка и монтаж</li><li>✓ Гарантия 5 лет</li></ul></div>
+            <div class="info-card"><h3>📋 Этапы работы</h3><ol><li>Заявка на сайте</li><li>Выезд замерщика</li><li>Расчет стоимости</li><li>Производство</li><li>Доставка и монтаж</li></ol></div>
+            <div class="info-card"><h3>📞 Контакты</h3><p>📞 +7 (928) 720-78-77</p><p>✉️ skywo@mail.ru</p><p>📍 Нальчик, ул. Каменная, 15</p></div>
         </div>
     </div>
 </div>
 
-<style>
-.promo-block {
-    background: var(--surface);
-    border-radius: 15px;
-    padding: 20px;
-    margin: 20px 0;
-}
-
-.promo-form {
-    display: flex;
-    gap: 10px;
-}
-
-.btn-promo {
-    padding: 0 20px;
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.btn-promo:hover {
-    background: var(--primary-light);
-}
-
-.promo-applied {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(39, 174, 96, 0.1);
-    color: var(--success);
-    padding: 15px;
-    border-radius: 8px;
-}
-
-.remove-promo {
-    background: none;
-    border: none;
-    color: var(--danger);
-    font-size: 1.2rem;
-    cursor: pointer;
-}
-
-.promo-message {
-    margin-top: 10px;
-    font-size: 0.9rem;
-}
-
-.promo-message.success {
-    color: var(--success);
-}
-
-.promo-message.error {
-    color: var(--danger);
-}
-
-.price-summary {
-    margin-top: 20px;
-    padding: 20px;
-    background: white;
-    border-radius: 15px;
-    box-shadow: var(--shadow-light);
-}
-
-.summary-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-}
-
-.summary-row.total {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--primary);
-    border-bottom: none;
-    margin-top: 10px;
-}
-
-.discount-row {
-    color: var(--success);
-}
-</style>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.8/jquery.inputmask.min.js"></script>
 <script>
-let originalPrice = 0;
+// Маска для телефона
+$(document).ready(function(){
+    $('#id_customer_phone').inputmask('+7 (999) 999-99-99', {
+        placeholder: '_',
+        showMaskOnHover: false,
+        showMaskOnFocus: true
+    });
+});
 
+// Расчет стоимости
 function calculatePrice() {
-    const stoneSelect = document.querySelector('#id_stone');
-    const length = parseFloat(document.querySelector('#id_length').value) || 0;
-    const width = parseFloat(document.querySelector('#id_width').value) || 0;
+    const stoneSelect = document.getElementById('id_stone');
+    const length = parseFloat(document.getElementById('id_length').value) || 0;
+    const width = parseFloat(document.getElementById('id_width').value) || 0;
     
     if (stoneSelect && stoneSelect.selectedIndex > 0) {
         const option = stoneSelect.options[stoneSelect.selectedIndex];
         const pricePerSqm = parseFloat(option.dataset.price || 0);
-        originalPrice = length * width * pricePerSqm;
-        document.getElementById('originalPrice').innerHTML = originalPrice.toLocaleString() + ' <span data-i18n="₽">₽</span>';
-        document.getElementById('finalPrice').innerHTML = originalPrice.toLocaleString() + ' <span data-i18n="₽">₽</span>';
+        const originalPrice = length * width * pricePerSqm;
+        document.getElementById('originalPrice').innerHTML = originalPrice.toLocaleString() + ' ₽';
+        document.getElementById('finalPrice').innerHTML = originalPrice.toLocaleString() + ' ₽';
     }
 }
 
-document.querySelector('#id_stone')?.addEventListener('change', calculatePrice);
-document.querySelector('#id_length')?.addEventListener('input', calculatePrice);
-document.querySelector('#id_width')?.addEventListener('input', calculatePrice);
-
+document.getElementById('id_stone')?.addEventListener('change', calculatePrice);
+document.getElementById('id_length')?.addEventListener('input', calculatePrice);
+document.getElementById('id_width')?.addEventListener('input', calculatePrice);
 calculatePrice();
 
-function applyPromo() {
-    const code = document.getElementById('promoCode').value;
-    const messageDiv = document.getElementById('promoMessage');
+// Валидация и отправка формы
+document.getElementById('orderForm').addEventListener('submit', function(e) {
+    const phoneInput = document.getElementById('id_customer_phone');
+    // Получаем чистый номер без маски
+    let phoneRaw = phoneInput.value.replace(/\D/g, '');
     
-    if (!code) {
-        messageDiv.innerHTML = '<span data-i18n="Введите промокод">Введите промокод</span>';
-        messageDiv.className = 'promo-message error';
-        return;
+    // Если начинается с 8, заменяем на 7
+    if (phoneRaw.startsWith('8')) {
+        phoneRaw = '7' + phoneRaw.substring(1);
     }
     
-    fetch('/discounts/apply/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}'
-        },
-        body: JSON.stringify({
-            code: code,
-            amount: originalPrice
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById('promoForm').style.display = 'none';
-            document.getElementById('promoApplied').style.display = 'flex';
-            document.getElementById('appliedCode').textContent = code;
-            
-            document.getElementById('discountRow').style.display = 'flex';
-            document.getElementById('discountAmount').innerHTML = `-${data.discount} <span data-i18n="₽">₽</span>`;
-            document.getElementById('finalPrice').innerHTML = `${data.final_price} <span data-i18n="₽">₽</span>`;
-            
-            messageDiv.innerHTML = `<span data-i18n="${data.message}">${data.message}</span>`;
-            messageDiv.className = 'promo-message success';
-        } else {
-            messageDiv.innerHTML = `<span data-i18n="${data.error}">${data.error}</span>`;
-            messageDiv.className = 'promo-message error';
-        }
-    });
-}
+    const errorDiv = document.getElementById('formErrors');
+    errorDiv.classList.remove('show');
+    errorDiv.innerHTML = '';
+    
+    let hasError = false;
+    
+    // Проверка имени
+    if (!document.getElementById('id_customer_name').value.trim()) {
+        errorDiv.innerHTML += '❌ Укажите ваше имя<br>';
+        hasError = true;
+    }
+    
+    // Проверка телефона
+    if (!phoneRaw || phoneRaw.length !== 11) {
+        errorDiv.innerHTML += '❌ Номер телефона должен содержать 11 цифр (например: +7 999 123-45-67)<br>';
+        hasError = true;
+    }
+    
+    // Проверка адреса
+    if (!document.getElementById('id_customer_address').value.trim()) {
+        errorDiv.innerHTML += '❌ Укажите адрес доставки<br>';
+        hasError = true;
+    }
+    
+    // Проверка камня
+    if (!document.getElementById('id_stone').value) {
+        errorDiv.innerHTML += '❌ Выберите камень<br>';
+        hasError = true;
+    }
+    
+    // Проверка длины и ширины
+    const length = parseFloat(document.getElementById('id_length').value);
+    const width = parseFloat(document.getElementById('id_width').value);
+    if (!length || length <= 0) {
+        errorDiv.innerHTML += '❌ Укажите корректную длину столешницы<br>';
+        hasError = true;
+    }
+    if (!width || width <= 0) {
+        errorDiv.innerHTML += '❌ Укажите корректную ширину столешницы<br>';
+        hasError = true;
+    }
+    
+    // Если есть ошибки - показываем и блокируем отправку
+    if (hasError) {
+        e.preventDefault();
+        errorDiv.classList.add('show');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return false;
+    }
+    
+    // Если ошибок нет - форма отправится
+    return true;
+});
 
-function removePromo() {
-    fetch('/discounts/remove/', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}'
+// Переключение режимов
+document.addEventListener('DOMContentLoaded', function() {
+    const btnManual = document.getElementById('btnManual');
+    const btnMap = document.getElementById('btnMap');
+    const manualMode = document.getElementById('manualMode');
+    const mapMode = document.getElementById('mapMode');
+    const addressInput = document.getElementById('id_customer_address');
+    const getLocationBtn = document.getElementById('getLocationBtn');
+    const successBadge = document.getElementById('successBadge');
+    
+    function switchToManual() {
+        manualMode.style.display = 'block';
+        mapMode.style.display = 'none';
+        btnManual.classList.add('active');
+        btnMap.classList.remove('active');
+    }
+    
+    function switchToMap() {
+        manualMode.style.display = 'none';
+        mapMode.style.display = 'block';
+        btnManual.classList.remove('active');
+        btnMap.classList.add('active');
+        setTimeout(() => {
+            const iframe = document.getElementById('yandexMap');
+            if (iframe) iframe.src = iframe.src;
+        }, 100);
+    }
+    
+    function getCurrentLocation() {
+        if (!navigator.geolocation) {
+            alert('❌ Ваш браузер не поддерживает геолокацию');
+            return;
         }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById('promoForm').style.display = 'flex';
-            document.getElementById('promoApplied').style.display = 'none';
-            document.getElementById('promoCode').value = '';
-            
-            document.getElementById('discountRow').style.display = 'none';
-            document.getElementById('finalPrice').innerHTML = originalPrice.toLocaleString() + ' <span data-i18n="₽">₽</span>';
-            
-            document.getElementById('promoMessage').innerHTML = '';
-        }
-    });
-}
+        getLocationBtn.textContent = '⏳ Определение...';
+        getLocationBtn.disabled = true;
+        navigator.geolocation.getCurrentPosition(
+            function(pos) {
+                const coords = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
+                addressInput.value = coords;
+                successBadge.classList.add('show');
+                setTimeout(() => successBadge.classList.remove('show'), 3000);
+                getLocationBtn.textContent = '📍 Моя текущая геолокация';
+                getLocationBtn.disabled = false;
+                switchToManual();
+            },
+            function() {
+                alert('❌ Не удалось определить местоположение. Разрешите доступ к геолокации.');
+                getLocationBtn.textContent = '📍 Моя текущая геолокация';
+                getLocationBtn.disabled = false;
+            }
+        );
+    }
+    
+    btnManual.onclick = switchToManual;
+    btnMap.onclick = switchToMap;
+    if (getLocationBtn) getLocationBtn.onclick = getCurrentLocation;
+    
+    manualMode.style.display = 'block';
+    mapMode.style.display = 'none';
+});
 </script>
 {% endblock %}
